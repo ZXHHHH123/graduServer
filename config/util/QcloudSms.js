@@ -1,3 +1,8 @@
+/*
+* 成功的操作
+*
+* */
+
 var QcloudSms = require("qcloudsms_js");
 
 // 短信应用SDK AppID

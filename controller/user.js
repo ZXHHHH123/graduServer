@@ -7,6 +7,10 @@
  */
 
 let model = require('../model/model');
+let smsConfig = require('../config/smsConfig');
+let utils = require('../config/util/utils');
+let QcloudSms = require("qcloudsms_js");
+
 const InitialCode = 1000;
 
 
@@ -29,9 +33,45 @@ async function openTest(ctx, next) {
 /*获取短信验证码*/
 async function getVarifyCode(ctx, next) {
     try {
-        
+        console.log('--getVerifyCode-111-用户获取短信验证--ctx'+JSON.stringify(ctx));
+        console.log(ctx.request.body);
+        let phone = ctx.request.body.phone;
+        // let accessKeyId = config.accessKeyId;
+        // let secretAccessKey = config.secretAccessKey;
+        let verifyCode = utils.getCode();  //生成六位数的验证码
+        console.log('~~~~~~');
+        console.log('随机生成的验证码' + verifyCode);
+        let smsItem = await model.SMS.findOne({phone});
+        console.log('smsItem' + JSON.stringify(smsItem));
+        if(!!smsItem) {
+            smsItem.verifyCode = verifyCode;
+            smsItem.createTime = new Date().getTime();
+            smsItem.codeStatus = 0;
+        }else {
+            await model.SMS.create({phone, verifyCode, codeStatus: 0})
+        }
+
+        // 实例化QcloudSms
+        let qcloudsms = QcloudSms(smsConfig.appid, smsConfig.appkey);
+        var ssender = qcloudsms.SmsSingleSender();
+        var params = [verifyCode , smsConfig.loseEfficacy];
+        ssender.sendWithParam(86, phone, smsConfig.templateId, params, smsConfig.smsSign, "", "", (err, res, resData) => {
+               if (err) {
+                   console.log("err: ", err);
+               } else {
+                   console.log("request data: ", res.req);
+                   console.log("response data: ", resData);
+               }
+        });  // 签名参数未提供或者为空时，会使用默认签名发送短信
+
+
+
+
+
+
     } catch (e) {
-        
+        console.log('~~~~~~~~~~');
+        console.log(JSON.stringify(e));
     }
 }
 
