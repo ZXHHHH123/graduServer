@@ -86,7 +86,7 @@ async function register(ctx, next) {
             console.log('register --222' + JSON.stringify(SMSCode));
             if (!!SMSCode) {
                 if (SMSCode.codeStatus === 0 && data.SMSCode === SMSCode.verifyCode) {
-                    if ((nowTime - SMSCode.createTime) > 2 * 60 * 60 * 1000) {
+                    if ((nowTime - SMSCode.createTime) > smsConfig.dbloseEfficacy) {
                         ctx.body = {
                             code: 302,
                             msg: 'SMSCode is old'
@@ -171,10 +171,6 @@ async function login(ctx, next) {
         let user = await model.user.findOne({phone: phone});
         if (!!user) {
             if (pwd === user.pwd) {
-                console.log(ctx);
-                console.log('~~~~~~~~~~~~~');
-                console.log(ctx.session);
-                console.log('login 111' + user._id);
                 ctx.session.user = user;
                 ctx.session.user.shareMsgId = '';  //用于发布朋友圈（上传）时作为判断依据
                 ctx.body = {
@@ -199,9 +195,64 @@ async function login(ctx, next) {
     }
 };
 
+/*
+* 修改账号密码
+* */
+
+async function updatePwd(ctx, next) {
+    try {
+        let body = ctx.request.body;
+        console.log(body);
+        let {phone, pwd, SMSCode} = body;
+        let SMSItem = await model.SMS.findOne({phone});
+        console.log(SMSItem.verifyCode);
+        let nowTime = +new Date();
+        if(!!SMSItem) {
+            if(SMSItem.codeStatus === 0 && SMSItem.verifyCode === SMSCode) {
+                if(nowTime - SMSItem.createTime > smsConfig.dbloseEfficacy) {
+                    ctx.body = {
+                        code: 301,
+                        msg: 'smscode is old'
+                    };
+                    console.log('after ctx can console this parse???????????????');
+                }else {
+                    SMSItem.codeStatus = 1;
+                    await SMSItem.save();
+                    let user = await model.user.findOneAndUpdate({phone: phone}, {$set: {pwd: pwd}});
+                    // let user = await model.user.findOneAndUpdate({phone}, {$set: {pwd: pwd}});
+                    if(!!user) {
+                        ctx.body = {
+                            code: 200,
+                            msg: 'update success'
+                        }
+                    }else {
+                        ctx.body = {
+                            code: 400,
+                            msg: 'update pwd fail or phone is no register'
+                        }
+                    }
+                }
+            }else {
+                ctx.body = {
+                    code: 302,
+                    msg: 'smscode is lose efficacy or smscode is error'
+                }
+            }
+        }else {
+            ctx.body = {
+                code: 301,
+                msg: 'no this phone smscode'
+            }
+        }
+    }catch(e) {
+        console.log('updataPwd--------err' + e);
+    }
+}
+
 module.exports = {
     openTest,
     register,
     login,
     getVarifyCode,
+    updatePwd,
 };
