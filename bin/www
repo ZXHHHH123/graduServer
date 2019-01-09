@@ -7,6 +7,9 @@
 var app = require('../app');
 var debug = require('debug')('demo:server');
 var http = require('http');
+var socket = require('socket.io');
+var ioSvc = require('../socket/io');
+
 
 /**
  * Get port from environment and store in Express.
@@ -23,6 +26,14 @@ console.log('port = ' + config.port);
 
 var server = http.createServer(app.callback());
 
+const io = socket(server);
+const redisAdapter = require('socket.io-redis');
+io.adapter(redisAdapter({host: config.redis_url, port: config.redis_port}));
+let newioSvc = new ioSvc.test(io);
+newioSvc.isServer();
+// newioSvc(io);
+
+// ioSvc.ioServer(io);
 /**
  * Listen on provided port, on all network interfaces.
  */

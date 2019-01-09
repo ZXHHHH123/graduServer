@@ -13,6 +13,7 @@ redisClient.on("error", function (err) {
 });
 
 function uncaughtExceptionHandler(err) {
+    console.log('uncaughtExceptionHandler' + err);
     if (err && err.code === 'ECONNREFUSED') {
         console.log(err);
     } else {

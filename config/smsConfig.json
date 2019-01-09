@@ -3,5 +3,6 @@
   "appkey": "a91640ed5de2e2b064e79d9835fe6c69",
   "templateId": "262609",
   "smsSign": "人才匹配应用2222222",
-  "loseEfficacy": "2"
+  "loseEfficacy": "2",
+  "dbloseEfficacy": 7200000
 }

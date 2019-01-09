@@ -1,4 +1,4 @@
-
+let smsConfig = require('../smsConfig');
 
 class utils{
 
@@ -33,6 +33,42 @@ class utils{
             randoms[0] = 1;
         }
         return randoms.join('');
+    };
+    static sendSMS(phone, ssender, params, smsItem) {
+        return new Promise((resolve, reject) => {
+            ssender.sendWithParam(82, phone, smsConfig.templateId, params, smsConfig.smsSign, "", "",  (err, res, resData) => {
+                if (err) {
+                    console.log("err: ", err);
+                    reject(err)
+                } else {
+                    console.log("request data: ", res.req);
+                    console.log("response data: ", resData);
+                    let {errmsg} = resData;
+                    console.log(errmsg);
+                    if (errmsg === 'OK') {
+                        smsItem.save();
+                        resolve({
+                            code: 200,
+                            msg: 'SMS code send success',
+                        })
+                        // ctx.body = {
+                        //     code: 200,
+                        //     msg: 'SMS code send success',
+                        // }
+                    } else {
+                        resolve({
+                            code: 400,
+                            msg: 'SMS code send fail 82----> 86',
+                        })
+                        // ctx.body = {
+                        //     code: 400,
+                        //     msg: 'SMS code send fail',
+                        // }
+                    }
+                }
+            });  // 签名参数未提供或者为空时，会使用默认签名发送短信
+        })
+
     }
 }
 
