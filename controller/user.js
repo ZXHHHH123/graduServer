@@ -172,7 +172,6 @@ async function login(ctx, next) {
         if (!!user) {
             if (pwd === user.pwd) {
                 ctx.session.user = user;
-                ctx.session.user.shareMsgId = '';  //用于发布朋友圈（上传）时作为判断依据
                 ctx.body = {
                     code: 200,
                     msg: 'user login success',

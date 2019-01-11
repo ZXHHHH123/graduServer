@@ -2,7 +2,7 @@
 * io基本监听
 * */
 let redisUtil = require('../config/util/redisUtil');
-// let ioSvc = require('./ioHelper').ioSvc;
+let ioSvc = require('./ioHelper').ioSvc;
 let model = require('../model/model');
 let dev = require('../config/development');
 
@@ -14,6 +14,7 @@ class test {
     isServer() {
         let io = this.io;
         console.log('==============启动socket.io成功==============');
+        ioSvc.setInstance(io);
         redisUtil.Set('online_count', 0, null, (err, res) => {
             if (err) {
                 console.log(err + '初始化redis失败')

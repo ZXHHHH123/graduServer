@@ -9,4 +9,9 @@ router.post('/user/login',doController.user.login);
 router.post('/user/updatePwd',doController.user.updatePwd);
 router.post('/user/getVarifyCode',doController.user.getVarifyCode);
 
+
+/*聊天板块*/
+router.post('/sendMsg/sendMsg',doController.sendMsg.sendMsg);
+
+
 module.exports = router;
