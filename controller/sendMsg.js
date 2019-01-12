@@ -60,6 +60,10 @@ async function sendMsg (ctx, next) {
             type,
             isSystemMsg: 0,
         };
+        /*
+           如果需要发送pushMessage（系统推送）则会在相应的发送系统消息的代码中改变data.msgClass的类型，现在这只是测试相应的接口
+           用于测试pushMessage接口 加上 data.msgClass = 'pushMessage';
+        * */
         send([uid], data);
         ctx.body = {
             code: 200,
@@ -79,13 +83,16 @@ function send(uid, data) {
         switch (data.type) {
             case msgType.private:
                 switch (data.msgClass) {
+                    /*发送聊天消息*/
                     case messageClass.message:
                         ioSvc.serverToPrivateMsg(uid, data);
-                        if(data.sendUserId) {
-                            console.log('data.sendUserId');
-                            console.log(msgHelper);
-                            msgHelper.addMsg();
-                        }
+                        msgHelper.addMsg(uid, data);
+                        break;
+                    /*发送推送消息*/
+                    case messageClass.pushMessage:
+                        ioSvc.serverToPushMessage(uid, data);
+                        msgHelper.addOffLinePushMsg(uid, data);
+                        break;
                 }
         }
 

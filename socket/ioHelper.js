@@ -15,15 +15,28 @@ ioSvc.serverBroadcastMsg = function (data) {
 ioSvc.serverToPrivateMsg = function(uid, data) {
     try {
         console.log('iohelper-----------' + uid);
-        redisUtil.Get(uid, (err, sid) => {
-            if(sid) {
-                this.io.to(sid).emit('message', data);
-                console.log('socket.io 发送成功');
+        redisUtil.Get(uid, (err, val) => {
+            if(val) {
+                this.io.to(val).emit('message', data);
+                console.log('socket.io 发送chat消息成功');
             }else {
                 console.log('无sid');
             }
         })
 
+    }catch (e) {
+
+    }
+}
+
+ioSvc.serverToPushMessage = function(uid, data) {
+    try {
+        redisUtil.Get(uid, (err, val) => {
+            if(val) {
+                this.io.to(val).emit('pushMessage', data);
+                console.log('socket.io 发送推送消息成功')
+            }
+        })
     }catch (e) {
 
     }
