@@ -1,4 +1,5 @@
 module.exports = {
     user: require('./user'),
-    sendMsg: require('./sendMsg')
+    sendMsg: require('./sendMsg'),
+    publish: require('./publish'),
 };

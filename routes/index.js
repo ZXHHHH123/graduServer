@@ -14,4 +14,8 @@ router.post('/user/getVarifyCode',doController.user.getVarifyCode);
 router.post('/sendMsg/sendMsg',doController.sendMsg.sendMsg);
 
 
+/*发布版块*/
+router.post('/publish/recruitjob', doController.publish.recruitjob)
+
+
 module.exports = router;

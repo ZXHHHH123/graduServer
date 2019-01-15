@@ -33,6 +33,8 @@ let mongoose = require('../config/util/db'),
 
 
         /*公司信息*/
+
+        isCompany: {type: Number, default: 0}, //是否为公司
         unit:{type: String, default:''},           //所在单位名称
 
     },{versionKey: false,usePushEach: true});

@@ -37,7 +37,7 @@ class utils {
 
     static sendSMS(phone, ssender, params, smsItem) {
         return new Promise((resolve, reject) => {
-            ssender.sendWithParam(82, phone, smsConfig.templateId, params, smsConfig.smsSign, "", "", (err, res, resData) => {
+            ssender.sendWithParam(86, phone, smsConfig.templateId, params, smsConfig.smsSign, "", "", (err, res, resData) => {
                 if (err) {
                     console.log("err: ", err);
                     reject(err)
