@@ -20,7 +20,7 @@ let mongoose = require('../config/util/db'),
         industry:{type: String, default:''},    //用户从事行业
         introduction:{type:String,default:''},      //自我介绍
         birthday:{type:String,default:''},           //生日
-        isWorker: {type: Number, default: 0},     //0代表是工作者，1代表公司
+        // isWorker: {type: Number, default: 0},     //0代表是工作者，1代表公司
 
 
 
@@ -36,6 +36,7 @@ let mongoose = require('../config/util/db'),
 
         isCompany: {type: Number, default: 0}, //是否为公司
         unit:{type: String, default:''},           //所在单位名称
+        companyCode: {type: String, default: ''} //公司机构码
 
     },{versionKey: false,usePushEach: true});
 

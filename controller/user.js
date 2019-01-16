@@ -40,13 +40,13 @@ async function getVarifyCode(ctx, next) {
         let verifyCode = utils.getCode();  //生成六位数的验证码
         console.log('随机生成的验证码' + verifyCode);
         let smsItem = await model.SMS.findOne({phone});
-        console.log('smsItem' + JSON.stringify(smsItem));
+        // console.log('smsItem' + JSON.stringify(smsItem));
         if (!!smsItem) {
             smsItem.verifyCode = verifyCode;
             smsItem.createTime = new Date().getTime();
             smsItem.codeStatus = 0;
         } else {
-            await model.SMS.create({phone, verifyCode, codeStatus: 0})
+            smsItem = await model.SMS.create({phone, verifyCode, codeStatus: 0, createTime: +new Date()})
         }
 
         // 实例化QcloudSms
@@ -100,6 +100,7 @@ async function register(ctx, next) {
                         } else {
                             openId = InitialCode;
                         }
+                        //创建一个用户
                         let new_user = await model.user.create({
                             openId: openId,
                             phone: phone,
@@ -120,15 +121,59 @@ async function register(ctx, next) {
                             introduction: data.introduction,
                             birthday: data.birthday,
                             isWorking: data.isWorking,
-                            isWorker: data.isWorker,
+                            isCompany: data.isCompany,
+                            companyCode: data.companyCode,
                         });
                         if (!!new_user) {
                             SMSCode.codeStatus = 1;
                             await SMSCode.save();
-                            ctx.body = {
-                                code: 200,
-                                msg: 'user  register success'
+                            if (data.isCompany === 0) {
+                                //求职者
+                                ctx.body = {
+                                    code: 200,
+                                    msg: 'user  register success'
+                                };
+                            } else {
+                                //发布职位者
+                                console.log('发布职位者');
+                                let userItem = await model.user.findOne({phone: data.phone});
+                                console.log(123);
+                                console.log(userItem);
+                                let companyItem = await model.company.findOne({companyCode: data.companyCode});
+                                console.log(456);
+                                if (!!companyItem) {
+                                    //    存在当前公司，向公司的hrArray添加当前hr，
+                                    console.log('存在当前公司');
+                                    await model.company.findOneAndUpdate({companyCode: data.companyCode}, {
+                                        $push: {
+                                            hrArray: {
+                                                name: userItem.nickName,
+                                                gender: userItem.gender,
+                                                hrId: userItem._id
+                                            }
+                                        }
+                                    });
+
+
+                                } else {
+                                    console.log('初次进入添加公司')
+                                    model.company.create({
+                                        name: data.unit,
+                                        companyCode: data.companyCode,
+                                        hrArray: [{
+                                            name: userItem.nickName,
+                                            gender: userItem.gender,
+                                            hrId: userItem._id,
+                                        }]
+                                    });
+                                }
+                                ctx.body = {
+                                    code: 200,
+                                    msg: 'user  register success'
+                                };
                             }
+
+
                         } else {
                             ctx.body = {
                                 code: 400,
@@ -206,44 +251,44 @@ async function updatePwd(ctx, next) {
         let SMSItem = await model.SMS.findOne({phone});
         console.log(SMSItem.verifyCode);
         let nowTime = +new Date();
-        if(!!SMSItem) {
-            if(SMSItem.codeStatus === 0 && SMSItem.verifyCode === SMSCode) {
-                if(nowTime - SMSItem.createTime > smsConfig.dbloseEfficacy) {
+        if (!!SMSItem) {
+            if (SMSItem.codeStatus === 0 && SMSItem.verifyCode === SMSCode) {
+                if (nowTime - SMSItem.createTime > smsConfig.dbloseEfficacy) {
                     ctx.body = {
                         code: 301,
                         msg: 'smscode is old'
                     };
                     console.log('after ctx can console this parse???????????????');
-                }else {
+                } else {
                     SMSItem.codeStatus = 1;
                     await SMSItem.save();
                     let user = await model.user.findOneAndUpdate({phone: phone}, {$set: {pwd: pwd}});
                     // let user = await model.user.findOneAndUpdate({phone}, {$set: {pwd: pwd}});
-                    if(!!user) {
+                    if (!!user) {
                         ctx.body = {
                             code: 200,
                             msg: 'update success'
                         }
-                    }else {
+                    } else {
                         ctx.body = {
                             code: 400,
                             msg: 'update pwd fail or phone is no register'
                         }
                     }
                 }
-            }else {
+            } else {
                 ctx.body = {
                     code: 302,
                     msg: 'smscode is lose efficacy or smscode is error'
                 }
             }
-        }else {
+        } else {
             ctx.body = {
                 code: 301,
                 msg: 'no this phone smscode'
             }
         }
-    }catch(e) {
+    } catch (e) {
         console.log('updataPwd--------err' + e);
     }
 }
