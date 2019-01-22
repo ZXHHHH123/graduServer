@@ -1,11 +1,16 @@
 let model = require('../model/model');
 let utils = require('../config/util/utils');
+let redisUtil = require('../config/util/redisUtil');
 async function recruitjob (ctx, next) {
     try {
         console.log('start----------recruitjob');
-        console.log(ctx.request.body);
         let data = ctx.request.body;
-        let {userId, companyCode, type, job, require, upMoney, floorMoney} = data;
+        let sign = ctx.request.header.authorization;
+        sign = sign.substring(7);
+        console.log(sign);
+        let {companyCode, type, job, require, upMoney, floorMoney} = data;
+        let userId = await redisUtil.AsyncGet(sign);
+        console.log('从redis中通过sign获得的userid值为' + userId);
         let user = await model.user.findOne({_id: userId});
         if(!user) {
             ctx.body = {

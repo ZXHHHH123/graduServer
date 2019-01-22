@@ -10,6 +10,10 @@ let model = require('../model/model');
 let smsConfig = require('../config/smsConfig');
 let utils = require('../config/util/utils');
 let QcloudSms = require("qcloudsms_js");
+let jsonwebtoken = require('jsonwebtoken');
+let redisUtil = require('../config/util/redisUtil');
+let systemConf = require('./../config/system/systemConf');
+
 
 const InitialCode = 1000;
 
@@ -216,11 +220,30 @@ async function login(ctx, next) {
         let user = await model.user.findOne({phone: phone});
         if (!!user) {
             if (pwd === user.pwd) {
+                /*session的操作待删除*/
                 ctx.session.user = user;
+                // exp: Math.floor(Date.now() / 1000) + (60 * 60)
+                let token = jsonwebtoken.sign({
+                    data: user,
+                    exp: Math.floor(Date.now() / 1000) + systemConf.expire
+                }, systemConf.secret);
+
+                console.log(user);
+                console.log(user._id);
+                redisUtil.Set(token, user._id.toString(), systemConf.expire, (err, res) => {
+                    if(err) {
+                        console.log(res);
+                    }else {
+                        console.log('设置成功');
+                    }
+                })
+
+
                 ctx.body = {
                     code: 200,
                     msg: 'user login success',
-                    data: user
+                    data: user,
+                    sign: token,
                 }
             } else {
                 ctx.body = {

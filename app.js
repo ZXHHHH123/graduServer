@@ -6,11 +6,14 @@ const json = require('koa-json')
 const onerror = require('koa-onerror')
 const bodyparser = require('koa-bodyparser')
 const logger = require('koa-logger')
+const jwt = require('koa-jwt')
 let session = require('koa-generic-session');
 let redis = require('redis');
 let redisStore = require('koa-redis');
 let dev = require('./config/development');
 let routes = require('./routes/index');
+let systemConf = require('./config/system/systemConf');
+let errorHandle = require('./config/system/errorHandle');
 let client = redis.createClient({
     port:dev.redis_port,
     host:dev.redis_url
@@ -40,11 +43,26 @@ app.use(cors(corsOptions));
 
 app.keys = ['some secret hurr'];
 //app.use(session(CONFIG, app));
+
+/*session这一块待删除*/
 app.use(session({
     store: redisStore({
         client: client,
     })
 }, app));
+
+
+/*jwt模块使用*/
+app.use(errorHandle);
+let secret = systemConf.secret;
+  app.use(jwt({
+    secret,
+  }).unless({
+    path: [/\/register/, /\/login/],
+  }));
+
+
+
 
 // middlewares
 app.use(bodyparser({
@@ -76,8 +94,19 @@ app.use(async (ctx, next) => {
 app.use(routes.routes());
 
 // error-handling
+
+
 app.on('error', (err, ctx) => {
-  console.error('server error', err, ctx)
+  console.error('server error', err, ctx);
+  console.log('~~~~~~~~!!!!!!!!!');
+  console.log(err.originalError.message);
+  // return
+     return ctx.body = {
+      code: 400,
+      msg: 'dfafd'
+    };
+    // throw err;
 });
+
 
 module.exports = app
