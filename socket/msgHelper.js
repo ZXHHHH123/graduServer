@@ -1,11 +1,12 @@
 let model = require('../model/model');
 let redisUtil = require('../config/util/redisUtil');
 
-function addMsg(uid, data) {
+async function addMsg(uid, data) {
+    console.log('uid============' + uid);
     try {
-        for(let i of uid) {
-            console.log('~~~~~~~~~~~~~~~~~~' + redisUtil.AsyncGet(i));
-            if(redisUtil.AsyncGet(i)) {
+            console.log('~~~~~~~~~~~~~~~~~~' + redisUtil.AsyncGet(uid));
+            if(await redisUtil.AsyncGet(uid)) {
+                console.log('存储消息---用户在线');
                 /*user online*/
                 model.msgLog.create({
                     userId: i,
@@ -23,8 +24,9 @@ function addMsg(uid, data) {
                 })
             }else {
                 /*user offline*/
+                console.log('存储消息---用户不在线');
                 model.offLineMsg.create({
-                    userId: i,
+                    userId: uid,
                     sendUserId: data.sendUserId,
                     userName: data.userName,
                     image: data.image,
@@ -38,7 +40,6 @@ function addMsg(uid, data) {
                     }
                 })
             }
-        }
 
     }catch (e) {
         console.log('addMsg-----------' + e);
