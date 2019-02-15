@@ -41,7 +41,6 @@ async function sendMsg (ctx, next) {
            用于测试pushMessage接口 加上 data.msgClass = 'pushMessage';
         * */
         send([uid], data);
-        await redOffLineMsg(uid);
         ctx.body = {
             code: 200,
             msg: '发送成功'
