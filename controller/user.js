@@ -76,10 +76,11 @@ async function register(ctx, next) {
         let data = ctx.request.body;
         let phone = data.phone;
         let nowTime = +new Date();
-        console.log('register --111' + phone);
-        console.log('ctx:' + JSON.stringify(ctx));
-        console.log(JSON.stringify(data));
+        // console.log('register --111' + phone);
+        // console.log('ctx:' + JSON.stringify(ctx));
+        // console.log(JSON.stringify(data));
         let user = await model.user.findOne({phone: phone}, {userId: 1});
+        console.log(user);
         if (!!user) {
             ctx.body = {
                 code: 300,
@@ -160,7 +161,7 @@ async function register(ctx, next) {
 
 
                                 } else {
-                                    console.log('初次进入添加公司')
+                                    console.log('初次进入添加公司');
                                     model.company.create({
                                         name: data.unit,
                                         companyCode: data.companyCode,
@@ -218,10 +219,12 @@ async function login(ctx, next) {
         //判断用户是否已经登录
 
         let user = await model.user.findOne({phone: phone});
+        console.log(user);
         if (!!user) {
+            console.log(123);
             if (pwd === user.pwd) {
                 /*session的操作待删除*/
-                ctx.session.user = user;
+                // ctx.session.user = user;
                 // exp: Math.floor(Date.now() / 1000) + (60 * 60)
                 let token = jsonwebtoken.sign({
                     data: user,
@@ -236,9 +239,7 @@ async function login(ctx, next) {
                     }else {
                         console.log('设置成功');
                     }
-                })
-
-
+                });
                 ctx.body = {
                     code: 200,
                     msg: 'user login success',
@@ -307,7 +308,7 @@ async function updatePwd(ctx, next) {
             }
         } else {
             ctx.body = {
-                code: 301,
+                code: 303,
                 msg: 'no this phone smscode'
             }
         }
