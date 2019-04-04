@@ -5,47 +5,23 @@ let utils = require('../config/util/utils');
 let msgType = require('../socket/messageTpye').messageType;
 let messageClass = require('../socket/messageTpye').messageClass;
 let msgHelper = require('../socket/msgHelper');
+let redisUtil = require('../config/util/redisUtil');
+
 
 async function sendMsg (ctx, next) {
     try {
-        if(ctx.session.user) {
-            console.log('当前用户session存在');
-        }
-        let user = ctx.session.user;
-        if(!user) {
+        console.log('发消息所传的token============' + ctx.request.headers.authorization);
+        let token = ctx.request.headers.authorization;
+        token = token.substr(7);
+        let userId = await redisUtil.AsyncGet(token);
+        if(!userId) {
             ctx.body = {
                 code: 401,
                 msg: '当前用户未登录'
             };
-            //todo // return;
+            return;
         }
-        /*todo 生产模式下要删掉这一段 现在这样写主要是为了能够在极客api上直接有效的调用该接口*/
-        if(!user) {
-            user = { nickName: 'zchuhyy',
-                phone: '13755038432',
-                pwd: '111111',
-                email: '',
-                address: '',
-                gender: 0,
-                city: '',
-                province: '',
-                IDCard: '',
-                image: '',
-                industry: '',
-                introduction: '',
-                birthday: '',
-                isWorker: 0,
-                workExperience: [],
-                educationBackground: [],
-                job: '',
-                isWorking: 0,
-                unit: '',
-                _id: '5c3569a5e3e63b091841b89d' }
-        }
-
-        let userInfo = await model.user.findOne({_id: user._id});
-        console.log(userInfo._id);
-        console.log(userInfo.nickName);
+        let userInfo = await model.user.findOne({_id: userId});
         let type = msgType.private;
         let msgClass = messageClass.message;
         let {uid, content} = ctx.request.body;
@@ -107,8 +83,15 @@ function send(uid, data) {
 
 }
 
+/*查询离线消息*/
+async function redOffLineMsg(userId) {
+    let userAllOfflineMsg = await model.offLineMsg.find({userId: userId});
+    console.log(userAllOfflineMsg);
+}
+
 
 module.exports = {
-    sendMsg
+    sendMsg,
+    redOffLineMsg
 };
 
