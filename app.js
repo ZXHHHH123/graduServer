@@ -1,15 +1,20 @@
-const Koa = require('koa')
-const app = new Koa()
+const Koa = require('koa');
+const app = new Koa();
 let path = require('path');
-const views = require('koa-views')
-const json = require('koa-json')
-const onerror = require('koa-onerror')
-const bodyparser = require('koa-bodyparser')
-const logger = require('koa-logger')
-const jwt = require('koa-jwt')
+const views = require('koa-views');
+const json = require('koa-json');
+const onerror = require('koa-onerror');
+const koaBody = require('koa-body');
+
+const formidable = require('koa2-formidable');
+const bodyparser = require('koa-bodyparser');
+
+const logger = require('koa-logger');
+const jwt = require('koa-jwt');
 let session = require('koa-generic-session');
 let redis = require('redis');
-let redisStore = require('koa-redis');
+let multer  = require('multer');
+// let redisStore = require('koa-redis');
 let dev = require('./config/development');
 let routes = require('./routes/index');
 let systemConf = require('./config/system/systemConf');
@@ -45,11 +50,11 @@ app.keys = ['some secret hurr'];
 //app.use(session(CONFIG, app));
 
 /*session这一块待删除*/
-app.use(session({
-    store: redisStore({
-        client: client,
-    })
-}, app));
+// app.use(session({
+//     store: redisStore({
+//         client: client,
+//     })
+// }, app));
 
 
 /*jwt模块使用*/
@@ -63,7 +68,8 @@ let secret = systemConf.secret;
 
 
 
-
+  app.use(formidable());
+// app.use(koaBody());
 // middlewares
 app.use(bodyparser({
   enableTypes:['json', 'form', 'text']

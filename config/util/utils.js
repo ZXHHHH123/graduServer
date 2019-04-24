@@ -1,3 +1,5 @@
+let redisUtil = require('./redisUtil');
+let model = require('../../model/model');
 let smsConfig = require('../smsConfig');
 
 class utils {
@@ -62,8 +64,21 @@ class utils {
             });  // 签名参数未提供或者为空时，会使用默认签名发送短信
         })
 
-    }
+    };
+  
+    
+
+};
+
+async function getUser(ctx) {
+    let sign = ctx.request.header.authorization;
+    sign = sign.substring(7);
+    let userId = await redisUtil.AsyncGet(sign);
+    let user = await model.user.findOne({_id: userId});
+    return user;
 }
+utils.getUser = getUser;
+
 
 module.exports = utils;
 // let verifyCode = utils.getCode();
