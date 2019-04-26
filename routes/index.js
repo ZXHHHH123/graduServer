@@ -22,7 +22,8 @@ router.post('/user/login',doController.user.login);
 router.post('/user/updatePwd',doController.user.updatePwd);
 router.post('/user/getVarifyCode',doController.user.getVarifyCode);
 router.post('/user/userInfo', doController.user.userInfo);
-router.post('/user/submitBossInfo', doController.user.submitBossInfo);
+router.post('/user/submitBossInfImg', doController.user.submitBossInfImg);
+router.post('/user/submitBossInfoBasic', doController.user.submitBossInfoBasic);
 
 
 /*聊天板块*/

@@ -341,17 +341,15 @@ async function userInfo(ctx, next) {
 /*
  * 填写用户转换身份为boss所填的的boss信息
  * */
-async function submitBossInfo(ctx, next) {
+async function submitBossInfImg(ctx, next) {
   try {
-    let body = ctx.request;
-    console.log(body);
     let sign = ctx.request.header.authorization;
     sign = sign.substring(7);
     let userId = await redisUtil.AsyncGet(sign);
     let user = await model.user.findOne({_id: userId});
-    let {imageFile, creditFrontSideFile, creditReverseSideFile} = ctx.request.files;
+    let {imageFile, creditFrontSideFile, creditReverseSideFile, nickName, place, userEmail, userCreditCode} = ctx.request.files;
     console.log('imageFile==========');
-    console.log(imageFile);
+
     let imgPath = imageFile.path;
     let qiniu = await upToQiniu(imgPath);
     let imageUrl = qiniuConf.qiniuApi + qiniu.key;
@@ -380,7 +378,27 @@ async function submitBossInfo(ctx, next) {
   } catch (e) {
     console.log('submitBossInfo--------err' + e);
   }
-};
+}
+async function submitBossInfoBasic(ctx, next) {
+  try{
+    let data = ctx.request.body;
+    console.log('submitBossInfBasic---------------');
+    console.log(data);
+    let user = await utils.getUser(ctx);
+    user.nickName = data.nickName;
+    user.place = data.place;
+    user.userCreditCode = data.userCreditCode;
+    user.userEmail = data.userEmail;
+    await user.save();
+    ctx.body = {
+      code: 200,
+      msg: 'basic info ok',
+    }
+  }catch(e){
+    console.log('submitBossInfBasic--------err' + e);
+  }
+}
+
 function upToQiniu(filePath, key) {
   const accessKey = qiniuConf.accessKey // 你的七牛的accessKey
   const secretKey = qiniuConf.secretKey // 你的七牛的secretKey
@@ -424,5 +442,6 @@ module.exports = {
   getVarifyCode,
   updatePwd,
   userInfo,
-  submitBossInfo
+  submitBossInfImg,
+  submitBossInfoBasic,
 };

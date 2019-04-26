@@ -63,7 +63,7 @@ let secret = systemConf.secret;
   app.use(jwt({
     secret,
   }).unless({
-    path: [/\/register/, /\/login/],
+    path: [/\/register/, /\/login/, /\/getVarifyCode/],
   }));
 
 

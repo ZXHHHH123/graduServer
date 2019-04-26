@@ -68,7 +68,7 @@ class utils {
   
     
 
-};
+}
 
 async function getUser(ctx) {
     let sign = ctx.request.header.authorization;
