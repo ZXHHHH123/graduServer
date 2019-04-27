@@ -20,6 +20,7 @@ router.get('/user/openTest',doController.user.openTest);
 router.post('/user/register',doController.user.register);
 router.post('/user/login',doController.user.login);
 router.post('/user/updatePwd',doController.user.updatePwd);
+router.post('/user/updatePhone',doController.user.updatePhone);
 router.post('/user/getVarifyCode',doController.user.getVarifyCode);
 router.post('/user/userInfo', doController.user.userInfo);
 router.post('/user/submitBossInfImg', doController.user.submitBossInfImg);

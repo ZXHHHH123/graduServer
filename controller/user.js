@@ -268,6 +268,46 @@ async function login(ctx, next) {
   }
 };
 
+/*
+* 修改账号手机号码
+* */
+async function updatePhone(ctx, next) {
+  try{
+    let body = ctx.request.body;
+    let nowTime = +new Date();
+    let {phone, smsCode} = body;
+    let user = await utils.getUser(ctx);
+    //找到手机号码所对应的验证码
+    let SMSCode = await model.SMS.findOne({phone: phone});
+    console.log('register --222' + JSON.stringify(SMSCode));
+    if(!!SMSCode) {
+      if (SMSCode.codeStatus === 0 && smsCode === SMSCode.verifyCode) {
+        if ((nowTime - SMSCode.createTime) > smsConfig.dbloseEfficacy) {
+          ctx.body = {
+            code: 302,
+            msg: 'SMSCode is old'
+          }
+        }else {
+          SMSCode.codeStatus = 1;
+          await SMSCode.save();
+          user.phone = phone;
+          await user.save();
+          ctx.body = {
+            code: 200,
+            msg: '更改手机号码成功'
+          }
+        }
+      }
+    }else {
+      ctx.body = {
+        code: 303,
+        msg: 'this phone SMSCode is no'
+      }
+    }
+  }catch (e){
+    console.log('updatePhone----------err' + e)
+  }
+}
 
 /*
  * 修改账号密码
@@ -383,12 +423,29 @@ async function submitBossInfoBasic(ctx, next) {
   try{
     let data = ctx.request.body;
     console.log('submitBossInfBasic---------------');
-    console.log(data);
     let user = await utils.getUser(ctx);
+    user.unit = data.unit;
     user.nickName = data.nickName;
     user.place = data.place;
     user.userCreditCode = data.userCreditCode;
     user.userEmail = data.userEmail;
+    user.companyCode = data.companyCode;
+    let companyCode = data.companyCode;
+    /*判断该公司是否已经创建过，如果没有则添加该公司*/
+    let company = await model.company.findOne({companyCode});
+    if(!company) {
+      console.log('不存在公司');
+      let new_company = await model.company.create({
+        name: data.unit,
+        companyCode: data.companyCode,
+        hrArray: [{
+          hrId: user._id,
+          name: user.nickName,
+          gender: user.gender,
+        }]
+      });
+    }
+    
     await user.save();
     ctx.body = {
       code: 200,
@@ -441,6 +498,7 @@ module.exports = {
   login,
   getVarifyCode,
   updatePwd,
+  updatePhone,
   userInfo,
   submitBossInfImg,
   submitBossInfoBasic,

@@ -5,23 +5,25 @@
 let mongoose = require('../config/util/db'),
     Schema = mongoose.Schema,
     schema = new Schema({
-       name: {type: String, default: ''},
-       companyCode: {type: String, default: ''},
-       hrArray: [{
-           hrId: {type: String, default: ''},
-           name: {type: String, default: ''},
-           gender: {type: String, default: '男'},
-       }],
-       publishJobArray: [{
-           type: {type: Number, default: 0},
-           job: {type: String, default: ''},
-           require: {type: String, default: ''},
-           upMoney: {type: Number, default: 0},
-           floorMoney: {type: Number, default: 0},
-           publisher: {type: String, default: ''},
-           publisherId: {type: String, default: ''},
-           publishTime: {type: Number, default: 0},
-       }]
+      name: {type: String, default: ''},
+      companyCode: {type: String, default: ''},
+      hrArray: [{
+        hrId: {type: String, default: ''},
+        name: {type: String, default: ''},
+        gender: {type: String, default: '男'},
+      }],
+      publishJobArray: [{
+        job: {type: String, default: ''},
+        jobAccount: {type: String, default: ''},
+        jobAddress: {type: String, default: ''},
+        experienceRequire: {type: String, default: ''},
+        studyRequire: {type: String, default: ''},
+        upMoney: {type: String, default: 0},
+        floorMoney: {type: String, default: 0},
+        publisher: {type: String, default: ''},
+        publisherId: {type: String, default: ''},
+        publishTime: {type: Number, default: 0},
+      }]
     }, {versionKey: false, usePushEach: true});
 
 
