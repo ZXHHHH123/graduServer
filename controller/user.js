@@ -171,7 +171,7 @@ async function register(ctx, next) {
                 } else {
                   console.log('初次进入添加公司');
                   model.company.create({
-                    name: data.unit,
+                    companyName: data.unit,
                     companyCode: data.companyCode,
                     hrArray: [{
                       name: userItem.nickName,
@@ -363,6 +363,23 @@ async function updatePwd(ctx, next) {
   }
 }
 
+async  function personSettingFixPhone(ctx, next) {
+  try{
+    let body = ctx.request.body;
+    console.log(body);
+    let {pwd} = body;
+    let user = await utils.getUser(ctx);
+    user.pwd = pwd;
+    await user.save();
+    ctx.body = {
+      code: 200,
+      msg: '更改密码成功'
+    }
+  }catch (err) {
+    console.log('personSettingFixPhone----------报错'+ err)
+  }
+}
+
 /*用户基本信息*/
 async function userInfo(ctx, next) {
   try{
@@ -370,7 +387,7 @@ async function userInfo(ctx, next) {
     ctx.body = {
       code: 200,
       msg: '成功获得用户信息',
-      user
+      data: user
     }
   }catch (e){
     console.log('userInfo--------err' + e);
@@ -436,7 +453,7 @@ async function submitBossInfoBasic(ctx, next) {
     if(!company) {
       console.log('不存在公司');
       let new_company = await model.company.create({
-        name: data.unit,
+        companyName: data.unit,
         companyCode: data.companyCode,
         hrArray: [{
           hrId: user._id,
@@ -498,6 +515,7 @@ module.exports = {
   login,
   getVarifyCode,
   updatePwd,
+  personSettingFixPhone,
   updatePhone,
   userInfo,
   submitBossInfImg,

@@ -20,6 +20,7 @@ router.get('/user/openTest',doController.user.openTest);
 router.post('/user/register',doController.user.register);
 router.post('/user/login',doController.user.login);
 router.post('/user/updatePwd',doController.user.updatePwd);
+router.post('/user/personSettingFixPhone',doController.user.personSettingFixPhone);
 router.post('/user/updatePhone',doController.user.updatePhone);
 router.post('/user/getVarifyCode',doController.user.getVarifyCode);
 router.post('/user/userInfo', doController.user.userInfo);
@@ -32,7 +33,7 @@ router.post('/sendMsg/sendMsg',doController.sendMsg.sendMsg);
 
 
 /*发布版块*/
-router.post('/publish/recruitjob', doController.publish.recruitjob)
+router.post('/recruiter/recruitjob', doController.recruiter.recruitjob)
 
 
 module.exports = router;

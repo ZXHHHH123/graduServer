@@ -1,5 +1,7 @@
 module.exports = {
-    user: require('./user'),
-    sendMsg: require('./sendMsg'),
-    publish: require('./publish'),
+  user: require('./user'),
+  sendMsg: require('./sendMsg'),
+  recruiter: require('./recruiter'),
+  jobHunter: require('./jobHunter'),
+  
 };

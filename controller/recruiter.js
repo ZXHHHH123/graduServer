@@ -1,6 +1,11 @@
+/*
+* 招聘者接口
+* */
 let model = require('../model/model');
 let utils = require('../config/util/utils');
 let redisUtil = require('../config/util/redisUtil');
+
+/*发布工作接口*/
 async function recruitjob(ctx, next) {
   try {
     console.log('start----------recruitjob');
@@ -8,9 +13,10 @@ async function recruitjob(ctx, next) {
     let sign = ctx.request.header.authorization;
     sign = sign.substring(7);
     console.log(sign);
-    let {type, job, jobAccount, jobAddress, experienceRequire, studyRequire, upMoney, floorMoney} = data;
+    let {jobLabel, jobValue, jobAccount, jobAddress, experienceRequire, studyRequire, upMoney, floorMoney, chooseCity, chooseCityValue,} = data;
     let userId = await redisUtil.AsyncGet(sign);
     console.log('从redis中通过sign获得的userid值为' + userId);
+    console.log(chooseCity, chooseCityValue);
     let user = await model.user.findOne({_id: userId});
     let companyCode = user.companyCode;
     if (!user) {
@@ -20,8 +26,6 @@ async function recruitjob(ctx, next) {
       };
       return;
     }
-    console.log(typeof user.isCompany);
-    console.log(user.isCompany);
     if (!user.isCompany) {
       ctx.body = {
         code: 404,
@@ -29,29 +33,45 @@ async function recruitjob(ctx, next) {
       };
       return;
     }
-    console.log(job +'---'+ jobAccount +'---'+ jobAddress +'---'+ experienceRequire +'---'+ studyRequire +'---'+ upMoney +'---'+ floorMoney);
-    if (job && jobAccount && jobAddress && experienceRequire && studyRequire && upMoney && floorMoney) {
+    console.log('---'+ jobAccount +'---'+ jobAddress +'---'+ experienceRequire +'---'+ studyRequire +'---'+ upMoney +'---'+ floorMoney);
+    if (jobLabel && jobAccount && jobAddress && experienceRequire && studyRequire && upMoney && floorMoney) {
       let company = await model.company.findOne({companyCode});
       //公司是肯定存在的，因为在注册的时候就创建了对应的公司
       if (!!company) {
+        let {companyCode, companyName} = company;
         //数据库存在当前companyId的公司，所以不用新建公司item；
         console.log('存在公司');
+        let job = await model.jobType.create({
+          jobLabel,
+          jobValue,
+          jobAccount,
+          jobAddress,
+          experienceRequire,
+          studyRequire,
+          upMoney,
+          floorMoney,
+          publisher: user.nickName,
+          publisherId: user._id,
+          publishTime: +new Date(),
+          companyCode,
+          companyName,
+        });
+        let jobId = job._id;
         company = await model.company.findOneAndUpdate({companyCode}, {
           $push: {
-            publishJobArray: {
-              job,
-              jobAccount,
-              jobAddress,
-              experienceRequire,
-              studyRequire,
-              upMoney,
-              floorMoney,
-              publisher: user.nickName,
-              publisherId: user._id,
-              publishTime: +new Date()
+            publishJobIdArray: {
+              jobId
             }
           }
         }, {new: true});
+        let cityLabel = chooseCity;
+        let cityValue = chooseCityValue;
+        
+        await model.city.create({
+          cityLabel,
+          cityValue,
+          jobId,
+        });
         ctx.body = {
           code: 200,
           msg: '发布成功',
