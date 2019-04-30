@@ -7,6 +7,7 @@ let mongoose = require('../config/util/db'),
       cityLabel: {type: String, default: ''},
       cityValue: {type: String, default: ''},
       jobId: {type: String, default: ''},
+      isDelete: {type: Number, default: 0}
     }, {versionKey: false, usePushEach: true});
 
 

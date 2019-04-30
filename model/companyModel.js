@@ -15,6 +15,7 @@ let mongoose = require('../config/util/db'),
       publishJobIdArray: [{
         jobId: {type: String, default: ''},
         publisherId: {type: String, default: ''},
+        isDelete: {type: Number, default: 0}
       }]
       // publishJobArray: [{
       //   jobLabel: {type: String, default: ''},

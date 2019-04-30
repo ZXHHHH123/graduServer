@@ -79,7 +79,7 @@ async function recruitjob(ctx, next) {
         ctx.body = {
           code: 200,
           msg: '发布成功',
-          data: company
+          data: jobId
         }
       } else {
         //不存在，需要新建
@@ -116,13 +116,14 @@ async function allPublishJob(ctx, body) {
     let companyPublishJob = (await model.company.findOne({companyCode})).publishJobIdArray;
     console.log(user._id);
     let presentHrPublishJob = companyPublishJob.filter((item, index) => {
-      return item.publisherId == user._id;
+      return item.publisherId == user._id && item.isDelete!==1;
     });
     console.log(presentHrPublishJob);
     let publisherAllJobDetail = [];
     ctx.body = await new Promise((resolve, reject) =>{
       presentHrPublishJob.forEach(async (item, index, presentHrPublishJob) => {
         let jobDetail = await model.jobType.findOne({_id: item.jobId});
+        
         publisherAllJobDetail.push(jobDetail);
         if(index === presentHrPublishJob.length - 1){
           resolve({
@@ -133,14 +134,6 @@ async function allPublishJob(ctx, body) {
         }
       })
     }) ;
-  
-    // ctx.body = {
-    //   code: 200,
-    //   msg: '搜索成功',
-    //   data: publisherAllJobDetail
-    // };
-    console.log('会走这里吗?');
-    
   } catch (err) {
     ctx.body = {
       code: 500,
@@ -177,8 +170,47 @@ async function deleteRecruitjob(ctx, body) {
   try {
     let user = await utils.getUser(ctx);
     let data = ctx.request.body;
-    let _id = data.publishJobId;
-    let deleteJob = await model.jobType.remove({_id});
+    let deleteJobId = data.publishJobId;
+    await model.jobType.findOneAndUpdate({_id: deleteJobId}, {
+      $set: {
+        isDelete: 1
+      }
+    });
+    await model.city.findOneAndUpdate({jobId: deleteJobId}, {
+      $set: {
+        isDelete: 1
+      }
+    });
+    console.log(111111);
+  
+   
+  
+  
+    let companyCode = user.companyCode;
+    let company = await model.company.findOne({companyCode});
+    let companyPublishJobIdArray = company.publishJobIdArray;
+    console.log(444444444);
+    console.log(companyPublishJobIdArray);
+    companyPublishJobIdArray.forEach((item, index) => {
+      console.log(5555555);
+      console.log(item);
+      console.log(item.jobId);
+      if(item.jobId == deleteJobId) {
+        console.log(3333);
+        item.isDelete = 1;
+        console.log(9999999999);
+        console.log(companyPublishJobIdArray);
+        company.publishJobIdArray = companyPublishJobIdArray;
+        company.save();
+        //  model.company.findOneAndUpdate({companyCode}, {
+        //   $set: {
+        //     publishJobIdArray: companyPublishJobIdArray
+        //   }
+        // });
+      }
+    });
+
+    
     ctx.body = {
       code: 200,
       msg: '删除成功'

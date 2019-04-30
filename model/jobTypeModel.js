@@ -22,6 +22,7 @@ let mongoose = require('../config/util/db'),
       publishTime: {type: Number, default: 0},
       companyCode: {type: String, default: ''},
       companyName: {type: String, default: ''},
+      isDelete: {type: Number, default: 0}
     }, {versionKey: false, usePushEach: true});
 
 
