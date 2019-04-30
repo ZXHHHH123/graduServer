@@ -32,8 +32,11 @@ router.post('/user/submitBossInfoBasic', doController.user.submitBossInfoBasic);
 router.post('/sendMsg/sendMsg',doController.sendMsg.sendMsg);
 
 
-/*发布版块*/
+/*招聘者接口版块*/
 router.post('/recruiter/recruitjob', doController.recruiter.recruitjob)
+router.post('/recruiter/allPublishJob', doController.recruiter.allPublishJob)
+router.post('/recruiter/updateRecruitjob', doController.recruiter.updateRecruitjob)
+router.post('/recruiter/deleteRecruitjob', doController.recruiter.deleteRecruitjob)
 
 
 module.exports = router;

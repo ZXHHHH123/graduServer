@@ -1,6 +1,6 @@
 /*
-* 招聘者接口
-* */
+ * 招聘者接口
+ * */
 let model = require('../model/model');
 let utils = require('../config/util/utils');
 let redisUtil = require('../config/util/redisUtil');
@@ -33,7 +33,7 @@ async function recruitjob(ctx, next) {
       };
       return;
     }
-    console.log('---'+ jobAccount +'---'+ jobAddress +'---'+ experienceRequire +'---'+ studyRequire +'---'+ upMoney +'---'+ floorMoney);
+    console.log('---' + jobAccount + '---' + jobAddress + '---' + experienceRequire + '---' + studyRequire + '---' + upMoney + '---' + floorMoney);
     if (jobLabel && jobAccount && jobAddress && experienceRequire && studyRequire && upMoney && floorMoney) {
       let company = await model.company.findOne({companyCode});
       //公司是肯定存在的，因为在注册的时候就创建了对应的公司
@@ -50,6 +50,8 @@ async function recruitjob(ctx, next) {
           studyRequire,
           upMoney,
           floorMoney,
+          chooseCity,
+          chooseCityValue,
           publisher: user.nickName,
           publisherId: user._id,
           publishTime: +new Date(),
@@ -57,10 +59,12 @@ async function recruitjob(ctx, next) {
           companyName,
         });
         let jobId = job._id;
+        let publisherId = user._id;
         company = await model.company.findOneAndUpdate({companyCode}, {
           $push: {
             publishJobIdArray: {
-              jobId
+              jobId,
+              publisherId
             }
           }
         }, {new: true});
@@ -101,6 +105,92 @@ async function recruitjob(ctx, next) {
   }
 }
 
+
+/*获取所有发布职位借口*/
+/*思路： 先找到用户，通过用户的companycode找到对应的公司表项，该项中记录着所有发布的职位*/
+async function allPublishJob(ctx, body) {
+  try {
+    let user = await utils.getUser(ctx);
+    let body = ctx.request.body;
+    let companyCode = user.companyCode;
+    let companyPublishJob = (await model.company.findOne({companyCode})).publishJobIdArray;
+    console.log(user._id);
+    let presentHrPublishJob = companyPublishJob.filter((item, index) => {
+      return item.publisherId == user._id;
+    });
+    console.log(presentHrPublishJob);
+    let publisherAllJobDetail = [];
+    ctx.body = await new Promise((resolve, reject) =>{
+      presentHrPublishJob.forEach(async (item, index, presentHrPublishJob) => {
+        let jobDetail = await model.jobType.findOne({_id: item.jobId});
+        publisherAllJobDetail.push(jobDetail);
+        if(index === presentHrPublishJob.length - 1){
+          resolve({
+            code: 200,
+            msg: '搜索成功',
+            data: publisherAllJobDetail
+          })
+        }
+      })
+    }) ;
+  
+    // ctx.body = {
+    //   code: 200,
+    //   msg: '搜索成功',
+    //   data: publisherAllJobDetail
+    // };
+    console.log('会走这里吗?');
+    
+  } catch (err) {
+    ctx.body = {
+      code: 500,
+      msg: '搜索失败',
+    };
+    console.log('allPublishJob======================' + err);
+  }
+}
+
+/*更新已发布的职位*/
+async function updateRecruitjob(ctx, next) {
+  try {
+    let user = await utils.getUser(ctx);
+    let data = ctx.request.body;
+    let {jobLabel, jobValue, jobAccount, jobAddress, experienceRequire, studyRequire, upMoney, floorMoney, chooseCity, chooseCityValue,} = data;
+    let presentJob = await model.jobType.findOneAndUpdate({_id: data._id}, {
+      $set: {
+        jobLabel, jobValue, jobAccount, jobAddress, experienceRequire, studyRequire, upMoney, floorMoney, chooseCity, chooseCityValue
+      }
+    });
+    
+    ctx.body = {
+      code: 200,
+      msg: '更新成功'
+    };
+   
+   
+  }catch (err) {
+    console.log('updateRecruitjob=============' + err);
+  }
+}
+
+async function deleteRecruitjob(ctx, body) {
+  try {
+    let user = await utils.getUser(ctx);
+    let data = ctx.request.body;
+    let _id = data.publishJobId;
+    let deleteJob = await model.jobType.remove({_id});
+    ctx.body = {
+      code: 200,
+      msg: '删除成功'
+    }
+    
+  }catch(err) {
+    console.log('deleteRecruitjob=============' + err);
+  }
+}
 module.exports = {
-  recruitjob
+  recruitjob,
+  allPublishJob,
+  updateRecruitjob,
+  deleteRecruitjob
 }

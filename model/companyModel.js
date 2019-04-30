@@ -13,7 +13,8 @@ let mongoose = require('../config/util/db'),
         gender: {type: String, default: '男'},
       }],
       publishJobIdArray: [{
-        jobId: {type: String, default: ''}
+        jobId: {type: String, default: ''},
+        publisherId: {type: String, default: ''},
       }]
       // publishJobArray: [{
       //   jobLabel: {type: String, default: ''},
