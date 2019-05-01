@@ -26,6 +26,11 @@ router.post('/user/getVarifyCode',doController.user.getVarifyCode);
 router.post('/user/userInfo', doController.user.userInfo);
 router.post('/user/submitBossInfImg', doController.user.submitBossInfImg);
 router.post('/user/submitBossInfoBasic', doController.user.submitBossInfoBasic);
+router.post('/user/submitTitImg', doController.user.submitTitImg);
+router.post('/user/submitUserBasicInfo', doController.user.submitUserBasicInfo);
+
+
+
 
 
 /*聊天板块*/

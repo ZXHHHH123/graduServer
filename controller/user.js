@@ -384,11 +384,45 @@ async  function personSettingFixPhone(ctx, next) {
 async function userInfo(ctx, next) {
   try{
     let user = await utils.getUser(ctx);
-    ctx.body = {
-      code: 200,
-      msg: '成功获得用户信息',
-      data: user
+    let allPublishJobType = {}; //招聘者所发布的职位中所有的职位类型
+    if(user.isCompany == 1) {
+      let companyCode = user.companyCode;
+  
+  
+      let companyPublishJob = (await model.company.findOne({companyCode})).publishJobIdArray;
+      console.log(user._id);
+      let presentHrPublishJob = companyPublishJob.filter((item, index) => {
+        return item.publisherId == user._id && item.isDelete!==1;
+      });
+      console.log(presentHrPublishJob);
+      ctx.body = await new Promise((resolve, reject) =>{
+        presentHrPublishJob.forEach(async (item, index, presentHrPublishJob) => {
+          let jobDetail = await model.jobType.findOne({_id: item.jobId});
+          
+          allPublishJobType[jobDetail.jobLabel] = {kay: jobDetail.jobValue, label: jobDetail.jobLabel, value: index};
+          if(index === presentHrPublishJob.length - 1){
+            console.log('啊啊啊啊啊啊啊啊啊啊啊');
+            console.log(allPublishJobType);
+            let data = {
+              user,
+              allPublishJobType
+            };
+            resolve({
+              code: 200,
+              msg: '搜索成功',
+              data
+            })
+          }
+        })
+      }) ;
+    }else {
+      ctx.body = {
+        code: 200,
+        msg: '成功获得用户信息',
+        data: user
+      }
     }
+
   }catch (e){
     console.log('userInfo--------err' + e);
   }
@@ -473,6 +507,60 @@ async function submitBossInfoBasic(ctx, next) {
   }
 }
 
+/*更新头像*/
+async function submitTitImg(ctx, next) {
+  try{
+    console.log('submittitimg');
+   console.log(ctx.request.files);
+   let {titImgFile} = ctx.request.files;
+    let user = await utils.getUser(ctx);
+    let imgPath = titImgFile.path;
+    let qiniu = await upToQiniu(imgPath);
+    let imageUrl = qiniuConf.qiniuApi + qiniu.key;
+    user.image = imageUrl;
+    await user.save();
+    ctx.body = {
+      code: 200,
+      msg: '更新头像成功'
+    }
+  
+  
+  }catch (err) {
+    console.log('submitTitImg==============' + err)
+  }
+};
+
+async function submitUserBasicInfo(ctx, body) {
+  try{
+    let data = ctx.request.body;
+    let user = await utils.getUser(ctx);
+    let { nickName, gender, joinWorkTime, birthTime,personAccount} = data;
+    console.log(nickName, gender, joinWorkTime, birthTime,personAccount);
+    if(nickName) {
+      user.nickName = nickName;
+    }
+    if(gender) {
+      user.gender = gender;
+    }
+    if(joinWorkTime) {
+      user.joinWorkTime = joinWorkTime;
+    }
+    if(birthTime) {
+      user.birthday = birthTime;
+    }
+    if(personAccount) {
+      user.personAccount = personAccount;
+    }
+    await user.save();
+    ctx.body = {
+      code: 200,
+      msg: '更新基本信息成功'
+    }
+  }catch (err) {
+    console.log('submitUserBasicInfo============' + err);
+  }
+}
+
 function upToQiniu(filePath, key) {
   const accessKey = qiniuConf.accessKey // 你的七牛的accessKey
   const secretKey = qiniuConf.secretKey // 你的七牛的secretKey
@@ -520,4 +608,6 @@ module.exports = {
   userInfo,
   submitBossInfImg,
   submitBossInfoBasic,
+  submitTitImg,
+  submitUserBasicInfo
 };

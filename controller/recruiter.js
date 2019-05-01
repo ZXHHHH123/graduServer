@@ -106,7 +106,7 @@ async function recruitjob(ctx, next) {
 }
 
 
-/*获取所有发布职位借口*/
+/*获取所有发布职位接口*/
 /*思路： 先找到用户，通过用户的companycode找到对应的公司表项，该项中记录着所有发布的职位*/
 async function allPublishJob(ctx, body) {
   try {

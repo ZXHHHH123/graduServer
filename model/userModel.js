@@ -20,6 +20,8 @@ let mongoose = require('../config/util/db'),
       industry: {type: String, default: ''},    //用户从事行业
       introduction: {type: String, default: ''},      //自我介绍
       birthday: {type: String, default: ''},           //生日
+      joinWorkTime: {type: String, default: ''},           //开始工作时间
+      personAccount: {type: String, default: ''},           //个人优势描述
       // isWorker: {type: Number, default: 0},     //0代表是工作者，1代表公司
       
       
