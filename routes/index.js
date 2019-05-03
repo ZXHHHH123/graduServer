@@ -37,11 +37,25 @@ router.post('/user/submitUserBasicInfo', doController.user.submitUserBasicInfo);
 router.post('/sendMsg/sendMsg',doController.sendMsg.sendMsg);
 
 
+/*求职者接口版块*/
+router.post('/jobhunter/saveExpectJobInfo', doController.jobHunter.saveExpectJobInfo);
+router.post('/jobhunter/saveWorkExpericence', doController.jobHunter.saveWorkExpericence);
+router.post('/jobhunter/earnJobHunterCurriculumviate', doController.jobHunter.earnJobHunterCurriculumviate);
+router.post('/jobhunter/deleteSingleWorkExpericence', doController.jobHunter.deleteSingleWorkExpericence);
+router.post('/jobhunter/updateJobWantedIntention', doController.jobHunter.updateJobWantedIntention);
+
+
+
+
+
+
+
 /*招聘者接口版块*/
 router.post('/recruiter/recruitjob', doController.recruiter.recruitjob)
 router.post('/recruiter/allPublishJob', doController.recruiter.allPublishJob)
 router.post('/recruiter/updateRecruitjob', doController.recruiter.updateRecruitjob)
 router.post('/recruiter/deleteRecruitjob', doController.recruiter.deleteRecruitjob)
+router.post('/recruiter/earnSingleJobTypeJobHunter', doController.recruiter.earnSingleJobTypeJobHunter)
 
 
 module.exports = router;

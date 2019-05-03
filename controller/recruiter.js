@@ -220,9 +220,34 @@ async function deleteRecruitjob(ctx, body) {
     console.log('deleteRecruitjob=============' + err);
   }
 }
+async function earnSingleJobTypeJobHunter(ctx, next) {
+  try{
+    let data = ctx.request.body;
+    let jobType = data.jobType;
+    console.log(jobType);
+    if(!jobType) {
+      ctx.body = {
+        code: 400,
+        msg: '请选择正确的类型'
+      }
+    }
+    let user = await utils.getUser(ctx);
+    let allSingleJobTypeJobHunter = await model.user.find({isCompany: 0, expectJobValue: jobType});
+    console.log(allSingleJobTypeJobHunter);
+    ctx.body = {
+      code: 200,
+      msg: '查询成功',
+      data: allSingleJobTypeJobHunter
+    }
+  
+  }catch (err) {
+    console.log('earnSingleJobTypeJobHunter==============' + err);
+  }
+}
 module.exports = {
   recruitjob,
   allPublishJob,
   updateRecruitjob,
-  deleteRecruitjob
+  deleteRecruitjob,
+  earnSingleJobTypeJobHunter
 }

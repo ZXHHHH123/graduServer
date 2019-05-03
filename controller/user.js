@@ -396,10 +396,15 @@ async function userInfo(ctx, next) {
       });
       console.log(presentHrPublishJob);
       ctx.body = await new Promise((resolve, reject) =>{
+        
+        let typeNum = 0;
         presentHrPublishJob.forEach(async (item, index, presentHrPublishJob) => {
           let jobDetail = await model.jobType.findOne({_id: item.jobId});
+          if(!allPublishJobType[jobDetail.jobLabel]) {
+            allPublishJobType[jobDetail.jobLabel] = {key: jobDetail.jobValue, label: jobDetail.jobLabel, value: typeNum};
+            typeNum++;
+          }
           
-          allPublishJobType[jobDetail.jobLabel] = {kay: jobDetail.jobValue, label: jobDetail.jobLabel, value: index};
           if(index === presentHrPublishJob.length - 1){
             console.log('啊啊啊啊啊啊啊啊啊啊啊');
             console.log(allPublishJobType);
@@ -416,10 +421,14 @@ async function userInfo(ctx, next) {
         })
       }) ;
     }else {
+      let data = {
+        user,
+        allPublishJobType
+      };
       ctx.body = {
         code: 200,
         msg: '成功获得用户信息',
-        data: user
+        data
       }
     }
 
@@ -534,13 +543,16 @@ async function submitUserBasicInfo(ctx, body) {
   try{
     let data = ctx.request.body;
     let user = await utils.getUser(ctx);
-    let { nickName, gender, joinWorkTime, birthTime,personAccount} = data;
+    let { nickName, gender, studyBackground, joinWorkTime, birthTime,personAccount} = data;
     console.log(nickName, gender, joinWorkTime, birthTime,personAccount);
     if(nickName) {
       user.nickName = nickName;
     }
     if(gender) {
       user.gender = gender;
+    }
+    if(studyBackground) {
+      user.studyBackground = studyBackground;
     }
     if(joinWorkTime) {
       user.joinWorkTime = joinWorkTime;

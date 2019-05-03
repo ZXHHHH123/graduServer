@@ -21,11 +21,21 @@ let mongoose = require('../config/util/db'),
       introduction: {type: String, default: ''},      //自我介绍
       birthday: {type: String, default: ''},           //生日
       joinWorkTime: {type: String, default: ''},           //开始工作时间
+      studyBackground: {type: String, default: ''},           //开始工作时间
       personAccount: {type: String, default: ''},           //个人优势描述
       // isWorker: {type: Number, default: 0},     //0代表是工作者，1代表公司
       
       
       /*求职者信息*/
+      expectJobLabel:{type: String, default: ''},// 期望的工作类型label
+      expectJobValue:{type: String, default: ''},// 期望的工作类型value
+      expectCity:{type: String, default: ''},// 期望的工作城市label
+      expectCityValue:{type: String, default: ''},// 期望的工作城市value
+      expectIndustry: [],// 期望的工作行业value
+      expectUpMoney: {type: String, default: ''},// 期望的工资上限value
+      expectFloorMoney: {type: String, default: ''},// 期望的工资下限value,
+      presentJobWantedIntention: {type: Number, default: 0}, // 当前求职者的求职意向
+      
       workExperience: [],                         //用户工作经历，包括用户曾经供职的地区、单位、职务、岗位、工作内容
       educationBackground: [],                     //曾经就读的学校名称、专业、在校时间。
       job: {type: String, default: ''},             //具体职业
