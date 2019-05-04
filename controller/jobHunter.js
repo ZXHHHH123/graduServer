@@ -131,7 +131,7 @@ async function updateJobWantedIntention (ctx, body) {
     let data = ctx.request.body;
     let user = await utils.getUser(ctx);
     console.log(data);
-    user.presentJobWantedIntention = data.jobType;
+    user.presentJobWantedIntention = data.value;
     await user.save();
     ctx.body = {
       code: 200,
