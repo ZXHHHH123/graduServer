@@ -7,6 +7,12 @@ let mongoose = require('../config/util/db'),
     schema = new Schema({
       companyName: {type: String, default: ''},
       companyCode: {type: String, default: ''},
+      leaderArray: [{
+        leaderName: {type: String, default: ''},
+        leaderPlace: {type: String, default: ''},
+        leaderImg: {type: String, default: ''},
+        leaderAccount: {type: String, default: ''},
+      }],
       hrArray: [{
         hrId: {type: String, default: ''},
         name: {type: String, default: ''},

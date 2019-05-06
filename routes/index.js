@@ -56,6 +56,10 @@ router.post('/recruiter/allPublishJob', doController.recruiter.allPublishJob)
 router.post('/recruiter/updateRecruitjob', doController.recruiter.updateRecruitjob)
 router.post('/recruiter/deleteRecruitjob', doController.recruiter.deleteRecruitjob)
 router.post('/recruiter/earnSingleJobTypeJobHunter', doController.recruiter.earnSingleJobTypeJobHunter)
-
+router.post('/recruiter/submitCompanyBasicInfo', doController.recruiter.submitCompanyBasicInfo)
+router.post('/recruiter/saveCompanyLeaderInfo', doController.recruiter.saveCompanyLeaderInfo)
+router.post('/recruiter/saveCompanyLeaderImage', doController.recruiter.saveCompanyLeaderImage)
+router.post('/recruiter/earnLeaderInfo', doController.recruiter.earnLeaderInfo)
+router.post('/recruiter/deleteLeaderInfo', doController.recruiter.deleteLeaderInfo)
 
 module.exports = router;
