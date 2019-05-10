@@ -51,7 +51,7 @@ let mongoose = require('../config/util/db'),
       creditFrontSide: {type: 'String', default: ''},
       creditReverseSide: {type: 'String', default: ''},
       userCreditCode: {type: 'String', default: ''},
-      userEmail: {type: 'String', default: ''},
+      wxCode: {type: 'String', default: ''},
     }, {versionKey: false, usePushEach: true});
 
 let model = mongoose.model('user', schema);

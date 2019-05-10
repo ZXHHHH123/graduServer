@@ -394,32 +394,40 @@ async function userInfo(ctx, next) {
       let presentHrPublishJob = companyPublishJob.filter((item, index) => {
         return item.publisherId == user._id && item.isDelete!==1;
       });
-      console.log(presentHrPublishJob);
-      ctx.body = await new Promise((resolve, reject) =>{
-        
-        let typeNum = 0;
-        presentHrPublishJob.forEach(async (item, index, presentHrPublishJob) => {
-          let jobDetail = await model.jobType.findOne({_id: item.jobId});
-          if(!allPublishJobType[jobDetail.jobLabel]) {
-            allPublishJobType[jobDetail.jobLabel] = {key: jobDetail.jobValue, label: jobDetail.jobLabel, value: typeNum};
-            typeNum++;
+      if(presentHrPublishJob.length === 0) {
+        ctx.body = {
+          code: 200,
+          msg: '成功获得用户信息',
+          data: {
+            user,
+            allPublishJobType
           }
-          
-          if(index === presentHrPublishJob.length - 1){
-            console.log('啊啊啊啊啊啊啊啊啊啊啊');
-            console.log(allPublishJobType);
-            let data = {
-              user,
-              allPublishJobType
-            };
-            resolve({
-              code: 200,
-              msg: '搜索成功',
-              data
-            })
-          }
-        })
-      }) ;
+        }
+      }else {
+        ctx.body = await new Promise((resolve, reject) =>{
+    
+          let typeNum = 0;
+          presentHrPublishJob.forEach(async (item, index, presentHrPublishJob) => {
+            let jobDetail = await model.jobType.findOne({_id: item.jobId});
+            if(!allPublishJobType[jobDetail.jobLabel]) {
+              allPublishJobType[jobDetail.jobLabel] = {key: jobDetail.jobValue, label: jobDetail.jobLabel, value: typeNum};
+              typeNum++;
+            }
+      
+            if(index === presentHrPublishJob.length - 1){
+              let data = {
+                user,
+                allPublishJobType
+              };
+              resolve({
+                code: 200,
+                msg: '搜索成功',
+                data
+              })
+            }
+          })
+        }) ;
+      }
     }else {
       let data = {
         user,

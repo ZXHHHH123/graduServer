@@ -38,6 +38,11 @@ router.post('/sendMsg/sendMsg',doController.sendMsg.sendMsg);
 
 
 /*求职者接口版块*/
+router.post('/jobhunter/earnRecommendJob', doController.jobHunter.earnRecommendJob);
+router.post('/jobhunter/earnJobDetail', doController.jobHunter.earnJobDetail);
+
+
+router.post('/jobhunter/earnRecommendCompany', doController.jobHunter.earnRecommendCompany);
 router.post('/jobhunter/saveExpectJobInfo', doController.jobHunter.saveExpectJobInfo);
 router.post('/jobhunter/saveWorkExpericence', doController.jobHunter.saveWorkExpericence);
 router.post('/jobhunter/earnJobHunterCurriculumviate', doController.jobHunter.earnJobHunterCurriculumviate);
@@ -61,5 +66,17 @@ router.post('/recruiter/saveCompanyLeaderInfo', doController.recruiter.saveCompa
 router.post('/recruiter/saveCompanyLeaderImage', doController.recruiter.saveCompanyLeaderImage)
 router.post('/recruiter/earnLeaderInfo', doController.recruiter.earnLeaderInfo)
 router.post('/recruiter/deleteLeaderInfo', doController.recruiter.deleteLeaderInfo)
+
+router.post('/recruiter/saveCompanyProductInfo', doController.recruiter.saveCompanyProductInfo)
+router.post('/recruiter/saveCompanyProductImage', doController.recruiter.saveCompanyProductImage)
+router.post('/recruiter/earnProductInfo', doController.recruiter.earnProductInfo)
+router.post('/recruiter/deleteProductInfo', doController.recruiter.deleteProductInfo)
+router.post('/recruiter/allCompanyInfo', doController.recruiter.allCompanyInfo)
+router.post('/recruiter/saveCompanyDetailInfo', doController.recruiter.saveCompanyDetailInfo)
+
+router.post('/recruiter/saveCompanyImage', doController.recruiter.saveCompanyImage)
+
+
+
 
 module.exports = router;

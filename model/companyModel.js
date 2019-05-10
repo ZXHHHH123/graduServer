@@ -7,6 +7,21 @@ let mongoose = require('../config/util/db'),
     schema = new Schema({
       companyName: {type: String, default: ''},
       companyCode: {type: String, default: ''},
+      companyAddress: {type: String, default: ''},
+      companyStar: {type: String, default: ''},
+      isBelisted: {type: Number, default: 0},
+      companyPeopleNum: {type: String, default: ''},
+      companyIndustry: [],
+      companyWorkTimeValue: {type: String, default: ''},
+      companyAccount: {type: String, default: ''},//公司介绍
+      companyWebsite: {type: String, default: ''},
+      companyWelfare: [],
+      companyHolidaySystem: {type: String, default: ''},
+      companyProduct: [{
+        productImg: {type: String, default: ''},
+        productName: {type: String, default: ''},
+        productAccount: {type: String, default: ''},
+      }],
       leaderArray: [{
         leaderName: {type: String, default: ''},
         leaderPlace: {type: String, default: ''},
@@ -21,8 +36,20 @@ let mongoose = require('../config/util/db'),
       publishJobIdArray: [{
         jobId: {type: String, default: ''},
         publisherId: {type: String, default: ''},
-        isDelete: {type: Number, default: 0}
-      }]
+        isDelete: {type: Number, default: 0},
+        jobLabel: {type: String, default: ''},
+        upMoney: {type: String, default: 0},
+        floorMoney: {type: String, default: 0},
+        publisher: {type: String, default: ''},
+        publisherImg: {type: String, default: ''},
+        publisherPlace: {type: String, default: ''},
+        experienceRequire: {type: String, default: ''},
+        studyRequire: {type: String, default: ''},
+        chooseCity: {type: String, default: 0},
+      }],
+  
+      companyLogo: {type: String, default: ''},
+      companyImage: [],
       // publishJobArray: [{
       //   jobLabel: {type: String, default: ''},
       //   jobValue: {type: String, default: ''},

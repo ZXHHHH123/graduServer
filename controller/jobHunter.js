@@ -15,7 +15,22 @@ async function earnRecommendJob(ctx, body) {
     let body = ctx.request.body;
     let user = await utils.getUser(ctx);
     if(user) {
-    
+      let {expectJobLabel, expectCityValue} = user;
+      console.log(expectJobLabel);
+      let allRecommendJob = await model.jobType.find({
+        isDelete: 0,
+        jobLabel: expectJobLabel,
+        chooseCityValue: expectCityValue,
+      });
+      // allRecommendJob.map((item, index) => {
+      //
+      // })
+      console.log(allRecommendJob);
+      ctx.body = {
+        code: 200,
+        msg: '推荐成功',
+        data: allRecommendJob
+      }
     }else {
       ctx.body = {
         code: 401,
@@ -24,6 +39,51 @@ async function earnRecommendJob(ctx, body) {
     }
   }catch (err) {
     console.log('earnRecommendJob----------------' + err);
+  }
+}
+
+async function earnJobDetail(ctx, body) {
+  try{
+    let data = ctx.request.body;
+    let jobId = data.jobId;
+    let job = await model.jobType.findOne({_id: jobId});
+    console.log(job);
+    ctx.body = {
+      code: 200,
+      msg: '查找工作成功',
+      data: job,
+    }
+  }catch (err){
+    console.log('earnJobDetail===========' + err);
+  }
+}
+
+async function earnRecommendCompany(ctx, body){
+  try {
+    let body = ctx.request.body;
+    let user = await utils.getUser(ctx);
+    if(user) {
+      /*tudo 如果没有筛选值，就将所有符合求职者的‘期望工作类型的值’的公司传递过去*/
+      let {expectIndustry} = user;
+      console.log(user);
+      let company = await model.company.find();
+      console.log(company);
+      let recommendCompany = company.filter((item, index) => {
+        let  companyIndustry = item.companyIndustry;
+        if(companyIndustry.indexOf(expectIndustry) >=0) {
+          return item;
+        }
+      });
+      console.log('recommendCompany=======');
+      console.log(recommendCompany);
+      ctx.body = {
+        code: 200,
+        msg: '获取推荐公司成功',
+        data: recommendCompany
+      }
+    }
+  }catch (err) {
+    console.log('earnRecommendCompany================' + err);
   }
 }
 
@@ -169,6 +229,8 @@ async function deleteSingleWorkExpericence(ctx, body) {
 
 module.exports = {
   earnRecommendJob,
+  earnJobDetail,
+  earnRecommendCompany,
   saveExpectJobInfo,
   saveWorkExpericence,
   deleteSingleWorkExpericence,

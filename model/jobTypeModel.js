@@ -18,11 +18,19 @@ let mongoose = require('../config/util/db'),
       chooseCity: {type: String, default: 0},
       chooseCityValue: {type: String, default: 0},
       publisher: {type: String, default: ''},
+      publisherImg: {type: String, default: ''},
+      publisherPlace: {type: String, default: ''},
       publisherId: {type: String, default: ''},
       publishTime: {type: Number, default: 0},
       companyCode: {type: String, default: ''},
       companyName: {type: String, default: ''},
-      isDelete: {type: Number, default: 0}
+      companyLogo: {type: String, default: ''},
+      companyPeopleNum: {type: String, default: ''},
+      companyIndustry: [],
+  
+      isDelete: {type: Number, default: 0},
+      isBelisted: {type: Number, default: 0},
+      companyAddress: {type: String, default: ''},
     }, {versionKey: false, usePushEach: true});
 
 

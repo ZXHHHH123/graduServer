@@ -40,7 +40,7 @@ async function recruitjob(ctx, next) {
       let company = await model.company.findOne({companyCode});
       //公司是肯定存在的，因为在注册的时候就创建了对应的公司
       if (!!company) {
-        let {companyCode, companyName} = company;
+        let {companyCode, companyName, isBelisted, companyAddress, companyLogo, companyPeopleNum, companyIndustry} = company;
         //数据库存在当前companyId的公司，所以不用新建公司item；
         console.log('存在公司');
         let job = await model.jobType.create({
@@ -55,18 +55,37 @@ async function recruitjob(ctx, next) {
           chooseCity,
           chooseCityValue,
           publisher: user.nickName,
+          publisherPlace: user.place,
           publisherId: user._id,
+          publisherImg: user.image,
           publishTime: +new Date(),
+          companyLogo,
           companyCode,
           companyName,
+          isBelisted,
+          companyAddress,
+          companyPeopleNum,
+          companyIndustry,
         });
         let jobId = job._id;
         let publisherId = user._id;
+        let publisher = user.nickName;
+        let publisherImg = user.image;
+        let publisherPlace = user.place;
         company = await model.company.findOneAndUpdate({companyCode}, {
           $push: {
             publishJobIdArray: {
               jobId,
-              publisherId
+              publisherId,
+              jobLabel,
+              upMoney,
+              floorMoney,
+              publisher,
+              publisherImg,
+              publisherPlace,
+              experienceRequire,
+              studyRequire,
+              chooseCity
             }
           }
         }, {new: true});
@@ -253,30 +272,57 @@ async function submitCompanyBasicInfo(ctx, body) {
     let data = ctx.request.body;
     let user = await utils.getUser(ctx);
     console.log(data);
-    let { nickName, gender, email, companyName, companyCode, place, wxCode} = data;
-    
-   
+    let {nickName, gender, userEmail, companyName, companyCode, companyStar, place, wxCode,companyAddress} = data;
     
     
     let company = await model.company.findOne({companyCode});
-    if(company) {
-    
-    }else {
+    if (company) {
+      user.unit = companyName,
+          user.userEmail = userEmail;
+      user.wxCode = wxCode;
+      user.place = place;
+      user.gender = gender;
+      user.nickName = nickName;
+      company.companyStar = companyStar;
+      company.companyName = companyName;
+      company.companyAddress = companyAddress;
+      await Promise.all([user.save(), company.save()]);
+      ctx.body = {
+        code: 200,
+        msg: '保存成功'
+      }
+    } else {
+      user.userEmail = userEmail;
+      user.wxCode = wxCode;
+      user.place = place;
+      user.gender = gender;
+      user.nickName = nickName;
+      user.unit = companyName,
+          await user.save();
       model.company.create({
-        companyName: data.unit,
-        companyCode: data.companyCode,
+        companyName: companyName,
+        companyCode: companyCode,
+        companyStar: companyStar,
         hrArray: [{
           name: user.nickName,
           gender: user.gender,
           hrId: user._id,
         }]
       });
+      ctx.body = {
+        code: 200,
+        msg: '保存成功'
+      }
     }
     
-  }catch (err) {
+  } catch (err) {
     console.log('submitCompanyBasicInfo============' + err);
   }
 }
+
+/*
+ * leader接口
+ * */
 
 async function saveCompanyLeaderImage(ctx, body) {
   try {
@@ -290,14 +336,15 @@ async function saveCompanyLeaderImage(ctx, body) {
     let company = await model.company.findOne({companyCode});
     let companyLeaderArray = Array.from(company.leaderArray);
     let flag = 0;
-    for(let i =0, len = companyLeaderArray.length; i < len; i++) {
-      if(!companyLeaderArray[i].leaderImg) {
+    for (let i = 0, len = companyLeaderArray.length; i < len; i++) {
+      if (!companyLeaderArray[i].leaderImg) {
         companyLeaderArray[i].leaderImg = imageUrl;
         flag = 1;
         break;
       }
-    };
-    if(flag === 0) {
+    }
+    ;
+    if (flag === 0) {
       companyLeaderArray.push({
         leaderImg: imageUrl
       })
@@ -309,8 +356,8 @@ async function saveCompanyLeaderImage(ctx, body) {
       msg: '保存成功',
       
     }
-  
-  }catch (err) {
+    
+  } catch (err) {
     console.log('saveCompanyLeaderImage==========' + err)
   }
 }
@@ -324,8 +371,8 @@ async function saveCompanyLeaderInfo(ctx, body) {
     console.log(company);
     let companyLeaderArray = Array.from(company.leaderArray);
     let flag = 0;
-    for(let i =0, len = companyLeaderArray.length; i < len; i++) {
-      if(!companyLeaderArray[i].leaderName) {
+    for (let i = 0, len = companyLeaderArray.length; i < len; i++) {
+      if (!companyLeaderArray[i].leaderName) {
         companyLeaderArray[i].leaderName = leaderName;
         companyLeaderArray[i].leaderPlace = leaderPlace;
         companyLeaderArray[i].leaderAccount = leaderAccount;
@@ -333,7 +380,7 @@ async function saveCompanyLeaderInfo(ctx, body) {
         break;
       }
     }
-    if(flag === 0) {
+    if (flag === 0) {
       companyLeaderArray.push({
         leaderName,
         leaderPlace,
@@ -346,7 +393,7 @@ async function saveCompanyLeaderInfo(ctx, body) {
       code: 200,
       msg: '保存成功'
     }
-  
+    
     // await model.company.findOneAndUpdate({companyCode}, {
     //   $push: {
     //     leaderArray: {
@@ -361,13 +408,13 @@ async function saveCompanyLeaderInfo(ctx, body) {
     //   msg: '保存leader基本信息成功'
     // }
     
-  }catch (err) {
+  } catch (err) {
     console.log('submitCompanyBasicInfo=====' + err);
   }
 }
 
 async function earnLeaderInfo(ctx, body) {
-  try{
+  try {
     let user = await utils.getUser(ctx);
     let companyCode = user.companyCode;
     let companyLeaderInfo = (await model.company.findOne({companyCode})).leaderArray;
@@ -377,13 +424,13 @@ async function earnLeaderInfo(ctx, body) {
       msg: '获取leader信息成功',
       data: companyLeaderInfo
     }
-  }catch (err) {
+  } catch (err) {
     console.log('earnLeaderInfo==========' + err);
   }
 }
 
-async function deleteLeaderInfo(ctx, body){
-  try{
+async function deleteLeaderInfo(ctx, body) {
+  try {
     console.log('aaaaaaaaaaaaa');
     let data = ctx.request.body;
     let user = await utils.getUser(ctx);
@@ -395,22 +442,276 @@ async function deleteLeaderInfo(ctx, body){
     companyLeaderArray.map((item, index) => {
       console.log(item._id);
       console.log(item._id == leaderInfoId);
-      if(item._id == leaderInfoId) {
+      if (item._id == leaderInfoId) {
         companyLeaderArray.splice(index, 1);
       }
     });
     company.leaderArray = companyLeaderArray;
     await company.save();
-    ctx.body={
+    ctx.body = {
       code: 200,
       msg: '删除成功',
       data: companyLeaderArray
     }
-  }catch (err) {
+  } catch (err) {
     console.log('deleteLeaderInfo=========' + err);
   }
 }
 
+
+/*
+ * 产品接口
+ * */
+
+async function saveCompanyProductImage(ctx, body) {
+  try {
+    let data = ctx.request.body;
+    let {imageFile} = ctx.request.files;
+    let imgPath = imageFile.path;
+    let qiniu = await upToQiniu(imgPath);
+    let imageUrl = qiniuConf.qiniuApi + qiniu.key;
+    let user = await utils.getUser(ctx);
+    let companyCode = user.companyCode;
+    let company = await model.company.findOne({companyCode});
+    let companyProductArray = Array.from(company.companyProduct);
+    let flag = 0;
+    for (let i = 0, len = companyProductArray.length; i < len; i++) {
+      if (!companyProductArray[i].productImg) {
+        companyProductArray[i].productImg = imageUrl;
+        flag = 1;
+        break;
+      }
+    }
+    ;
+    if (flag === 0) {
+      companyProductArray.push({
+        productImg: imageUrl
+      })
+    }
+    company.companyProduct = companyProductArray;
+    await company.save();
+    ctx.body = {
+      code: 200,
+      msg: '保存成功',
+      
+    }
+    
+  } catch (err) {
+    console.log('saveCompanyProductImage==========' + err)
+  }
+}
+async function saveCompanyProductInfo(ctx, body) {
+  try {
+    let data = ctx.request.body;
+    let {productName, productAccount} = data;
+    let user = await utils.getUser(ctx);
+    let companyCode = user.companyCode;
+    let company = await model.company.findOne({companyCode});
+    console.log(company);
+    let companyProductArray = Array.from(company.companyProduct);
+    let flag = 0;
+    for (let i = 0, len = companyProductArray.length; i < len; i++) {
+      if (!companyProductArray[i].productName) {
+        companyProductArray[i].productName = productName;
+        companyProductArray[i].productAccount = productAccount;
+        flag = 1;
+        break;
+      }
+    }
+    if (flag === 0) {
+      companyProductArray.push({
+        productName,
+        productAccount
+      })
+    }
+    company.companyProduct = companyProductArray;
+    await company.save();
+    ctx.body = {
+      code: 200,
+      msg: '保存成功'
+    }
+    
+    // await model.company.findOneAndUpdate({companyCode}, {
+    //   $push: {
+    //     leaderArray: {
+    //       leaderName,
+    //       leaderPlace,
+    //       leaderAccount
+    //     }
+    //   }
+    // });
+    // ctx.body = {
+    //   code: 200,
+    //   msg: '保存leader基本信息成功'
+    // }
+    
+  } catch (err) {
+    console.log('saveCompanyProductInfo=====' + err);
+  }
+}
+
+async function earnProductInfo(ctx, body) {
+  try {
+    let user = await utils.getUser(ctx);
+    let companyCode = user.companyCode;
+    let companyProductInfo = (await model.company.findOne({companyCode})).companyProduct;
+    
+    ctx.body = {
+      code: 200,
+      msg: '获取leader信息成功',
+      data: companyProductInfo
+    }
+  } catch (err) {
+    console.log('earnProductInfo==========' + err);
+  }
+}
+
+async function deleteProductInfo(ctx, body) {
+  try {
+    console.log('aaaaaaaaaaaaa');
+    let data = ctx.request.body;
+    let user = await utils.getUser(ctx);
+    let companyCode = user.companyCode;
+    let company = await model.company.findOne({companyCode});
+    let companyProductArray = Array.from(company.companyProduct);
+    let productId = data._id;
+    console.log(productId);
+    companyProductArray.map((item, index) => {
+      console.log(item._id);
+      console.log(item._id == productId);
+      if (item._id == productId) {
+        companyProductArray.splice(index, 1);
+      }
+    });
+    company.companyProduct = companyProductArray;
+    await company.save();
+    ctx.body = {
+      code: 200,
+      msg: '删除成功',
+      data: companyProductArray
+    }
+  } catch (err) {
+    console.log('deleteProductInfo=========' + err);
+  }
+}
+
+async function allCompanyInfo(ctx, body) {
+  try {
+    let user = await utils.getUser(ctx);
+    let companyCode = user.companyCode;
+    let company = await model.company.findOne({companyCode});
+    ctx.body = {
+      code: 200,
+      msg: '获取公司基本信息成功',
+      data: company,
+    }
+  } catch (err) {
+    console.log('allCompanyInfo===============' + err);
+  }
+}
+
+
+async function saveCompanyImage(ctx, body) {
+  try {
+    let data = ctx.request.body;
+    let user = await utils.getUser(ctx);
+    let companyCode = user.companyCode;
+    let company = await model.company.findOne({companyCode});
+    let companyImage = Array.from(company.companyImage);
+    let {imageFile0, imageFile1, imageFile2, imageFile3, imageFile4, companyLogo} = ctx.request.files;
+    let imgPath0, imgPath1, imgPath2, imgPath3, imgPath4, companyLogoPath;
+    if (companyLogo) {
+      companyLogoPath = companyLogo.path;
+      let qiniu = await upToQiniu(companyLogoPath);
+      let imageUrl = qiniuConf.qiniuApi + qiniu.key;
+      company.companyLogo = imageUrl;
+    }
+    if (imageFile0) {
+      imgPath0 = imageFile0.path;
+      let qiniu = await upToQiniu(imgPath0);
+      let imageUrl = qiniuConf.qiniuApi + qiniu.key;
+      companyImage.push({uri: imageUrl})
+    }
+    if (imageFile1) {
+      imgPath1 = imageFile1.path;
+      let qiniu = await upToQiniu(imgPath1);
+      let imageUrl = qiniuConf.qiniuApi + qiniu.key;
+      companyImage.push({uri: imageUrl})
+    }
+    if (imageFile2) {
+      imgPath2 = imageFile2.path;
+      let qiniu = await upToQiniu(imgPath2);
+      let imageUrl = qiniuConf.qiniuApi + qiniu.key;
+      companyImage.push({uri: imageUrl})
+    }
+    if (imageFile3) {
+      imgPath3 = imageFile3.path;
+      let qiniu = await upToQiniu(imgPath3);
+      let imageUrl = qiniuConf.qiniuApi + qiniu.key;
+      companyImage.push({uri: imageUrl})
+    }
+    if (imageFile4) {
+      imgPath4 = imageFile4.path;
+      let qiniu = await upToQiniu(imgPath4);
+      let imageUrl = qiniuConf.qiniuApi + qiniu.key;
+      companyImage.push({uri: imageUrl})
+    }
+    let result = [];
+    let obj = {};
+    for (let i = 0; i < companyImage.length; i++) {
+      if (!obj[companyImage[i].uri]) {
+        result.push(companyImage[i]);
+        obj[companyImage[i].uri] = true;
+      }
+    }
+    
+    company.companyImage = result;
+    await company.save();
+    ctx.body = {
+      code: 200,
+      msg: '上传公司照片成功'
+    }
+    
+    
+    // let qiniu = await upToQiniu(imgPath1);
+    // let imageUrl = qiniuConf.qiniuApi + qiniu.key;
+    // let data = ctx.request.body;
+    // let user = await utils.getUser(ctx);
+    // let companyCode = user.companyCode;
+    // let company = await model.company.findOne({companyCode});
+  } catch (err) {
+    console.log('saveCompanyImage==============' + err);
+  }
+}
+async function saveCompanyDetailInfo(ctx, body) {
+  try {
+    let data = ctx.request.body;
+    let user = await utils.getUser(ctx);
+    let companyCode = user.companyCode;
+    let company = await model.company.findOne({companyCode});
+    console.log(data);
+    let {isBelisted, companyPeopleNum, companyIndustry, pickerWorkTimeValue, companyAccount, companyWebsite, companyWelfare, companyHolidaySystem, companyAddress} = data;
+    company.isBelisted = isBelisted;
+    company.companyPeopleNum = companyPeopleNum;
+    company.companyIndustry = companyIndustry;
+    company.companyWorkTimeValue = pickerWorkTimeValue;
+    company.companyAccount = companyAccount;
+    company.companyWebsite = companyWebsite;
+    company.companyAddress = companyAddress;
+    if (companyWelfare.length > 0) {
+      company.companyWelfare = companyWelfare;
+    }
+    company.companyHolidaySystem = companyHolidaySystem;
+    await company.save();
+    ctx.body = {
+      code: 200,
+      msg: '保存公司详细信息成功'
+    }
+    
+  } catch (err) {
+    console.log('saveCompanyDetailInfo=========' + err);
+  }
+}
 
 function upToQiniu(filePath, key) {
   const accessKey = qiniuConf.accessKey // 你的七牛的accessKey
@@ -456,6 +757,14 @@ module.exports = {
   submitCompanyBasicInfo,
   saveCompanyLeaderInfo,
   saveCompanyLeaderImage,
+  saveCompanyImage,
   earnLeaderInfo,
-  deleteLeaderInfo
+  deleteLeaderInfo,
+  saveCompanyProductInfo,
+  saveCompanyProductImage,
+  earnProductInfo,
+  deleteProductInfo,
+  
+  allCompanyInfo,
+  saveCompanyDetailInfo,
 }
