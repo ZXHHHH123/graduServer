@@ -35,7 +35,7 @@ let mongoose = require('../config/util/db'),
       expectUpMoney: {type: String, default: ''},// 期望的工资上限value
       expectFloorMoney: {type: String, default: ''},// 期望的工资下限value,
       presentJobWantedIntention: {type: Number, default: 0}, // 当前求职者的求职意向
-      
+      attentionCompany: [], //所关注的公司
       workExperience: [],                         //用户工作经历，包括用户曾经供职的地区、单位、职务、岗位、工作内容
       educationBackground: [],                     //曾经就读的学校名称、专业、在校时间。
       job: {type: String, default: ''},             //具体职业

@@ -45,6 +45,8 @@ router.post('/jobhunter/earnJobDetail', doController.jobHunter.earnJobDetail);
 router.post('/jobhunter/earnRecommendCompany', doController.jobHunter.earnRecommendCompany);
 router.post('/jobhunter/saveExpectJobInfo', doController.jobHunter.saveExpectJobInfo);
 router.post('/jobhunter/saveWorkExpericence', doController.jobHunter.saveWorkExpericence);
+router.post('/jobhunter/attentionCompany', doController.jobHunter.attentionCompany);
+router.post('/jobhunter/earnAllAttentionCompany', doController.jobHunter.earnAllAttentionCompany);
 router.post('/jobhunter/earnJobHunterCurriculumviate', doController.jobHunter.earnJobHunterCurriculumviate);
 router.post('/jobhunter/deleteSingleWorkExpericence', doController.jobHunter.deleteSingleWorkExpericence);
 router.post('/jobhunter/updateJobWantedIntention', doController.jobHunter.updateJobWantedIntention);
