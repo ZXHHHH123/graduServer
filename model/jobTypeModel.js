@@ -7,7 +7,8 @@ let mongoose = require('../config/util/db'),
     schema = new Schema({
       jobLabel: {type: String, default: ''},
       jobValue: {type: String, default: ''},
-      
+  
+      userEmail: {type: String, default: ''},
       
       jobAccount: {type: String, default: ''},
       jobAddress: {type: String, default: ''},

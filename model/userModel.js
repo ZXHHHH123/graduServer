@@ -40,7 +40,7 @@ let mongoose = require('../config/util/db'),
       educationBackground: [],                     //曾经就读的学校名称、专业、在校时间。
       job: {type: String, default: ''},             //具体职业
       isWorking: {type: Number, default: 0},     //0代表未就业，1代表已就业
-      collectJob: [],                           //用户收藏的公司岗位
+      collectJobArr: [],                           //用户收藏的公司岗位
       
       
       /*公司信息*/

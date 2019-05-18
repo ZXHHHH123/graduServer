@@ -58,6 +58,7 @@ async function recruitjob(ctx, next) {
           publisherPlace: user.place,
           publisherId: user._id,
           publisherImg: user.image,
+          userEmail: user.userEmail,
           publishTime: +new Date(),
           companyLogo,
           companyCode,
@@ -243,7 +244,8 @@ async function deleteRecruitjob(ctx, body) {
 async function earnSingleJobTypeJobHunter(ctx, next) {
   try {
     let data = ctx.request.body;
-    let jobType = data.jobType;
+    console.log(data);
+    let {jobType, city, require} = data;
     console.log(jobType);
     if (!jobType) {
       ctx.body = {
@@ -251,8 +253,65 @@ async function earnSingleJobTypeJobHunter(ctx, next) {
         msg: '请选择正确的类型'
       }
     }
+    let studyRequire, experienceRequire, upMoney, floorMoney;
+    if (require[0] === '学历') {
+      studyRequire = require[1];
+    } else if (require[0] === '薪水') {
+      upMoney = require[1].split('~')[0];
+      floorMoney = require[1].split('~')[1];
+    } else if (require[0] === '经验') {
+      experienceRequire = require[1]
+    }
+    
     let user = await utils.getUser(ctx);
-    let allSingleJobTypeJobHunter = await model.user.find({isCompany: 0, expectJobValue: jobType});
+    let allSingleJobTypeJobHunter;
+    
+    if (studyRequire) {
+      console.log(1);
+      if (studyRequire === '全部') {
+        console.log(2);
+        allSingleJobTypeJobHunter = await model.user.find({
+          isCompany: 0,
+          expectJobValue: jobType,
+          expectCity: city
+        });
+      } else {
+        console.log(3);
+        allSingleJobTypeJobHunter = await model.user.find({
+          isCompany: 0,
+          expectJobValue: jobType,
+          studyRequire,
+          expectCity: city
+        });
+      }
+    } else if (experienceRequire) {
+      console.log(4);
+      if (experienceRequire === '全部') {
+        console.log(5);
+        allSingleJobTypeJobHunter = await model.user.find({
+          isCompany: 0,
+          expectJobValue: jobType,
+          expectCity: city
+        });
+      } else {
+        console.log(6);
+        allSingleJobTypeJobHunter = await model.user.find({
+          isCompany: 0,
+          expectJobValue: jobType,
+          experienceRequire,
+          expectCity: city
+        });
+      }
+    } else {
+      console.log(7);
+      allSingleJobTypeJobHunter = await model.user.find({
+        isCompany: 0,
+        expectJobValue: jobType,
+        expectCity: city
+      });
+    }
+    
+    
     console.log(allSingleJobTypeJobHunter);
     ctx.body = {
       code: 200,
@@ -272,7 +331,7 @@ async function submitCompanyBasicInfo(ctx, body) {
     let data = ctx.request.body;
     let user = await utils.getUser(ctx);
     console.log(data);
-    let {nickName, gender, userEmail, companyName, companyCode, companyStar, place, wxCode,companyAddress} = data;
+    let {nickName, gender, userEmail, companyName, companyCode, companyStar, place, wxCode, companyAddress} = data;
     
     
     let company = await model.company.findOne({companyCode});
@@ -690,7 +749,7 @@ async function saveCompanyDetailInfo(ctx, body) {
     let companyCode = user.companyCode;
     let company = await model.company.findOne({companyCode});
     console.log(data);
-    let {isBelisted, companyPeopleNum, companyIndustry, pickerWorkTimeValue, companyAccount, companyWebsite, companyWelfare, companyHolidaySystem, companyAddress} = data;
+    let {isBelisted, companyPeopleNum, companyIndustry, pickerWorkTimeValue, companyAccount, companyWebsite, companyWelfare, companyHolidaySystem, companyAddress, companyEmail} = data;
     company.isBelisted = isBelisted;
     company.companyPeopleNum = companyPeopleNum;
     company.companyIndustry = companyIndustry;
@@ -698,6 +757,7 @@ async function saveCompanyDetailInfo(ctx, body) {
     company.companyAccount = companyAccount;
     company.companyWebsite = companyWebsite;
     company.companyAddress = companyAddress;
+    company.companyEmail = companyEmail;
     if (companyWelfare.length > 0) {
       company.companyWelfare = companyWelfare;
     }
@@ -712,6 +772,171 @@ async function saveCompanyDetailInfo(ctx, body) {
     console.log('saveCompanyDetailInfo=========' + err);
   }
 }
+
+async function sendCurriculumVitaeToEmail(ctx, body) {
+  try {
+    let data = ctx.request.body;
+    console.log(data);
+    let {jobHunterId} = data;
+    let user = await utils.getUser(ctx);
+    let recruiterId = user._id;
+    /*presentJobHunterAndRecruiter是唯一的一个*/
+    let presentJobHunterAndRecruiter = await model.communicationDetail.find({
+      jobHunterId,
+      recruiterId
+    });
+    if (presentJobHunterAndRecruiter.length === 0) {
+      model.communicationDetail.create({
+        jobHunterId,
+        recruiterId,
+        curriculumVitaeToEmail: 1,
+      });
+    } else {
+      presentJobHunterAndRecruiter[0].curriculumVitaeToEmail = 1;
+      await presentJobHunterAndRecruiter[0].save();
+    }
+    ctx.body = {
+      code: 200,
+      msg: '发送请求成功'
+    }
+    
+  } catch (err) {
+    console.log('sendCurriculumVitaeToEmail==============' + err);
+  }
+}
+
+async function sendInterviewDetail(ctx, body) {
+  try {
+    let data = ctx.request.body;
+    let {jobHunterId, interviewAddress, interviewTime, wxCode, remarks} = data;
+    let user = await utils.getUser(ctx);
+    let recruiterId = user._id;
+    /*presentJobHunterAndRecruiter是唯一的一个*/
+    let presentJobHunterAndRecruiter = await model.communicationDetail.find({
+      jobHunterId,
+      recruiterId
+    });
+    if (presentJobHunterAndRecruiter.length === 0) {
+      model.communicationDetail.create({
+        jobHunterId,
+        recruiterId,
+        isSendInterview: 1,
+        interviewDetail: {
+          interviewAddress,
+          interviewTime,
+          wxCode,
+          remarks
+        }
+      });
+    } else {
+      presentJobHunterAndRecruiter[0].isSendInterview = 1;
+      presentJobHunterAndRecruiter[0].interviewDetail = {
+        interviewAddress,
+        interviewTime,
+        wxCode,
+        remarks
+      };
+      await presentJobHunterAndRecruiter[0].save();
+    }
+    
+    ctx.body = {
+      code: 200,
+      msg: '发送成功'
+    }
+    
+    
+  } catch (err) {
+    console.log('sendInterviewDetail========' + err);
+  }
+}
+
+async function earnCommunicateData(ctx, body) {
+  try {
+    let data = ctx.request.body;
+    let user = await utils.getUser(ctx);
+    let allCommunicateData = await model.communicationDetail.find({
+      recruiterId: user._id
+    });
+    let interviewData = [];
+    interviewData = allCommunicateData.filter((item, index) => {
+      if (item.isSendInterview) {
+        return item;
+      }
+    });
+    ctx.body = {
+      code: 200,
+      msg: '发送成功',
+      data: {
+        allCommunicateData,
+        interviewData
+      }
+      
+    }
+  } catch (err) {
+    console.log('earnCommunicateData===========' + err);
+  }
+}
+
+async function earnDetailCommunicateData(ctx, body) {
+  try {
+    let data = ctx.request.body;
+    console.log(data);
+    let {allCommunicateData} = data;
+    let detailCommunicateData = [];
+    ctx.body = await new Promise((resolve, reject) => {
+      allCommunicateData.forEach(async(item, index) => {
+        console.log(item.jobHunterId);
+        let singleJobHunter = await model.user.findOne({
+          _id: item.jobHunterId
+        });
+        detailCommunicateData.push(singleJobHunter);
+    
+        if(index === allCommunicateData.length - 1){
+          resolve({
+            code: 200,
+            msg: '获取成功',
+            data: detailCommunicateData,
+          })
+        }
+      })
+    })
+    
+    
+  }catch (err) {
+    console.log('earnDetailCommunicateData===========' + err);
+  }
+}
+
+async function earnInterviewData(ctx, body) {
+  try{
+    let data = ctx.request.body;
+    console.log(data);
+    let {allInerviewData} = data;
+    let detailInterviewData = [];
+    ctx.body = await new Promise((resolve, reject) => {
+      allInerviewData.forEach(async(item, index) => {
+        console.log(item.jobHunterId);
+        let singleJobHunter = await model.user.findOne({
+          _id: item.jobHunterId
+        });
+        detailInterviewData.push(singleJobHunter);
+      
+        if(index === allInerviewData.length - 1){
+          resolve({
+            code: 200,
+            msg: '获取成功',
+            data: detailInterviewData,
+          })
+        }
+      })
+    })
+    
+  }catch (err) {
+    console.log('earnInterviewData=============' + err);
+  }
+}
+
+
 
 function upToQiniu(filePath, key) {
   const accessKey = qiniuConf.accessKey // 你的七牛的accessKey
@@ -767,4 +992,10 @@ module.exports = {
   
   allCompanyInfo,
   saveCompanyDetailInfo,
+  
+  sendCurriculumVitaeToEmail,
+  sendInterviewDetail,
+  earnCommunicateData,
+  earnDetailCommunicateData,
+  earnInterviewData,
 }

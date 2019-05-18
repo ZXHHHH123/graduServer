@@ -15,6 +15,7 @@ let mongoose = require('../config/util/db'),
       companyWorkTimeValue: {type: String, default: ''},
       companyAccount: {type: String, default: ''},//公司介绍
       companyWebsite: {type: String, default: ''},
+      companyEmail: {type: String, default: ''},
       companyWelfare: [],
       companyHolidaySystem: {type: String, default: ''},
       companyProduct: [{

@@ -15,38 +15,39 @@ async function earnRecommendJob(ctx, body) {
     let data = ctx.request.body;
     console.log(data);
     let {city, company, require} = data;
-    let companyPeopleNum, companyIndustry,financeState;
-    if(company[0] === '融资阶段') {
+    let companyPeopleNum, companyIndustry, financeState;
+    if (company[0] === '融资阶段') {
       financeState = company[1]
-    }else if(company[0] === '人员规模'){
+    } else if (company[0] === '人员规模') {
       companyPeopleNum = company[1]
-    }else if(company[0] === '行业'){
+    } else if (company[0] === '行业') {
       companyIndustry = company[1]
     }
     
     let studyRequire, experienceRequire, upMoney, floorMoney;
-    if(require[0] === '学历'){
+    if (require[0] === '学历') {
       studyRequire = require[1];
-    }else if(require[0] === '薪水'){
-      upMoney = require[1].split('~')[0]; floorMoney = require[1].split('~')[1];
-    }else if(require[0] === '经验'){
-      experienceRequire =  require[1]
+    } else if (require[0] === '薪水') {
+      upMoney = require[1].split('~')[0];
+      floorMoney = require[1].split('~')[1];
+    } else if (require[0] === '经验') {
+      experienceRequire = require[1]
     }
     console.log(studyRequire, experienceRequire);
     let user = await utils.getUser(ctx);
     if (user) {
       let {expectJobLabel, expectCityValue} = user;
       console.log(expectJobLabel);
-      let allRecommendJob
-      if(studyRequire) {
-        if(studyRequire === '全部') {
+      let allRecommendJob;
+      if (studyRequire) {
+        if (studyRequire === '全部') {
           allRecommendJob = await model.jobType.find({
             isDelete: 0,
             jobLabel: expectJobLabel,
             chooseCityValue: expectCityValue,
             chooseCity: city,
           });
-        }else {
+        } else {
           allRecommendJob = await model.jobType.find({
             isDelete: 0,
             jobLabel: expectJobLabel,
@@ -55,15 +56,15 @@ async function earnRecommendJob(ctx, body) {
             studyRequire
           });
         }
-      }else if(experienceRequire){
-        if(experienceRequire === '全部') {
+      } else if (experienceRequire) {
+        if (experienceRequire === '全部') {
           allRecommendJob = await model.jobType.find({
             isDelete: 0,
             jobLabel: expectJobLabel,
             chooseCityValue: expectCityValue,
             chooseCity: city,
           });
-        }else {
+        } else {
           allRecommendJob = await model.jobType.find({
             isDelete: 0,
             jobLabel: expectJobLabel,
@@ -72,38 +73,49 @@ async function earnRecommendJob(ctx, body) {
             experienceRequire,
           });
         }
-        
+      } else {
+        allRecommendJob = await model.jobType.find({
+          isDelete: 0,
+          jobLabel: expectJobLabel,
+          chooseCityValue: expectCityValue,
+          chooseCity: city,
+        });
       }
- 
+      console.log(allRecommendJob);
+      
       console.log('aaaaaaaaa');
       console.log(allRecommendJob.length);
       let filterJob = allRecommendJob.filter((item, index) => {
         console.log(item.companyIndustry);
-        if(companyPeopleNum) {
-          let companyPeopleNumArr = (companyPeopleNum.substring(companyPeopleNum.length-1,0)).split('~');
+        console.log(companyPeopleNum);
+        if (companyPeopleNum && companyPeopleNum !== '不限') {
+          let companyPeopleNumArr = (companyPeopleNum.substring(companyPeopleNum.length - 1, 0)).split('~');
           let companyPeopleNumFloor = parseInt(companyPeopleNumArr[0]);
           let companyPeopleNumUp = parseInt(companyPeopleNumArr[1]);
-          let jobPeopleNumArr = (item.companyPeopleNum.substring(item.companyPeopleNum.length-1,0)).split('~');
+          let jobPeopleNumArr = (item.companyPeopleNum.substring(item.companyPeopleNum.length - 1, 0)).split('~');
           let jobPeopleNumFloor = parseInt(jobPeopleNumArr[0]);
           let jobPeopleNumUp = parseInt(jobPeopleNumArr[1]);
           console.log(jobPeopleNumFloor);
           console.log(companyPeopleNumFloor);
-          console.log((jobPeopleNumFloor>=(companyPeopleNumFloor -20)) && (jobPeopleNumFloor<=(companyPeopleNumFloor +20 )));
-          console.log((jobPeopleNumUp>=(companyPeopleNumUp -20 ) && jobPeopleNumUp<=(companyPeopleNumUp +20 )));
-          if((jobPeopleNumFloor>=(companyPeopleNumFloor -20)) && (jobPeopleNumFloor<=(companyPeopleNumFloor +20 )) || (jobPeopleNumUp>=(companyPeopleNumUp -20 ) && jobPeopleNumUp<=(companyPeopleNumUp +20 ))){
+          console.log((jobPeopleNumFloor >= (companyPeopleNumFloor - 20)) && (jobPeopleNumFloor <= (companyPeopleNumFloor + 20 )));
+          console.log((jobPeopleNumUp >= (companyPeopleNumUp - 20 ) && jobPeopleNumUp <= (companyPeopleNumUp + 20 )));
+          if ((jobPeopleNumFloor >= (companyPeopleNumFloor - 20)) && (jobPeopleNumFloor <= (companyPeopleNumFloor + 20 )) || (jobPeopleNumUp >= (companyPeopleNumUp - 20 ) && jobPeopleNumUp <= (companyPeopleNumUp + 20 ))) {
             return item
           }
+        } else if (companyPeopleNum === '不限') {
+          return item
         }
-        if(companyIndustry) {
-          if(companyIndustry === '全部'){
+        if (companyIndustry) {
+          if (companyIndustry === '全部') {
             return item
           }
-          if(item.companyIndustry.indexOf(companyIndustry) >=0) {
+          if (item.companyIndustry.indexOf(companyIndustry) >= 0) {
             console.log(999999999999);
             return item
           }
         }
-       
+        
+        
       });
       
       // allRecommendJob.map((item, index) => {
@@ -143,26 +155,52 @@ async function earnJobDetail(ctx, body) {
 
 async function earnRecommendCompany(ctx, body) {
   try {
-    let body = ctx.request.body;
+    let data = ctx.request.body;
+    console.log(body);
+    let {sizeValue, industryValue} = data;
     let user = await utils.getUser(ctx);
     if (user) {
       /*tudo 如果没有筛选值，就将所有符合求职者的‘期望工作类型的值’的公司传递过去*/
       let {expectIndustry} = user;
-      console.log(user);
+      let recommendCompany;
       let company = await model.company.find();
       console.log(company);
-      let recommendCompany = company.filter((item, index) => {
-        let companyIndustry = item.companyIndustry;
-        if (companyIndustry.indexOf(expectIndustry) >= 0) {
-          return item;
+      if (industryValue === '全部') {
+        recommendCompany = company;
+      } else {
+        recommendCompany = company.filter((item, index) => {
+          let companyIndustry = item.companyIndustry;
+          if (companyIndustry.indexOf(expectIndustry) >= 0) {
+            return item;
+          }
+        });
+      }
+      let filterJob = recommendCompany.filter((item, index) => {
+        if (sizeValue !== '不限') {
+          let companyPeopleNumArr = (sizeValue.substring(sizeValue.length - 1, 0)).split('~');
+          let companyPeopleNumFloor = parseInt(companyPeopleNumArr[0]);
+          let companyPeopleNumUp = parseInt(companyPeopleNumArr[1]);
+          let jobPeopleNumArr = (item.companyPeopleNum.substring(item.companyPeopleNum.length - 1, 0)).split('~');
+          let jobPeopleNumFloor = parseInt(jobPeopleNumArr[0]);
+          let jobPeopleNumUp = parseInt(jobPeopleNumArr[1]);
+          // console.log(jobPeopleNumFloor);
+          // console.log(companyPeopleNumFloor);
+          // console.log((jobPeopleNumFloor>=(companyPeopleNumFloor -20)) && (jobPeopleNumFloor<=(companyPeopleNumFloor +20 )));
+          // console.log((jobPeopleNumUp>=(companyPeopleNumUp -20 ) && jobPeopleNumUp<=(companyPeopleNumUp +20 )));
+          if ((jobPeopleNumFloor >= (companyPeopleNumFloor - 20)) && (jobPeopleNumFloor <= (companyPeopleNumFloor + 20 )) || (jobPeopleNumUp >= (companyPeopleNumUp - 20 ) && jobPeopleNumUp <= (companyPeopleNumUp + 20 ))) {
+            return item
+          }
         }
+        return item
       });
+      
+      
       console.log('recommendCompany=======');
-      console.log(recommendCompany);
+      console.log(filterJob);
       ctx.body = {
         code: 200,
         msg: '获取推荐公司成功',
-        data: recommendCompany
+        data: filterJob
       }
     }
   } catch (err) {
@@ -266,12 +304,12 @@ async function earnAllAttentionCompany(ctx, body) {
     let attentionComapnyArr = user.attentionCompany;
     let allComapnyData = [];
     ctx.body = await new Promise((resolve, reject) => {
-      attentionComapnyArr.forEach(async(item, index) => {
+      attentionComapnyArr.forEach(async (item, index) => {
         console.log('item======' + item);
         let company = await model.company.findOne({_id: item});
         console.log(company);
         allComapnyData.push(company);
-        if(index === attentionComapnyArr.length -1) {
+        if (index === attentionComapnyArr.length - 1) {
           resolve({
             code: 200,
             msg: '获取成功',
@@ -361,6 +399,297 @@ async function deleteSingleWorkExpericence(ctx, body) {
   }
 }
 
+async function collectJob(ctx, body) {
+  try {
+    let data = ctx.request.body;
+    let {jobId} = data;
+    let user = await utils.getUser(ctx);
+    let collectJobArr = Array.from(user.collectJobArr);
+    if (collectJobArr.indexOf(jobId) < 0) {
+      collectJobArr.push(jobId);
+    }
+    user.collectJobArr = collectJobArr;
+    await user.save();
+    ctx.body = {
+      code: 200,
+      msg: '收藏成功',
+    }
+  } catch (err) {
+    console.log('collectJob=========' + err)
+  }
+}
+
+async function earnCollectJob(ctx, body) {
+  try {
+    let user = await utils.getUser(ctx);
+    let collectJobIdArr = user.collectJobArr;
+    let collectJobArr = [];
+    ctx.body = await new Promise((resolve, reject) => {
+      collectJobIdArr.forEach(async (item, index) => {
+        let collectJobItem = await model.jobType.findOne({_id: item});
+        collectJobArr.push(collectJobItem);
+        if (index === collectJobIdArr.length - 1) {
+          resolve({
+            code: 200,
+            msg: '获取所有收藏的职位成功',
+            data: collectJobArr,
+          })
+        }
+      });
+    });
+    // await collectJobIdArr.map(async (item, index) => {
+    //   console.log(item);
+    //   let collectJobItem = await model.jobType.findOne({item});
+    //   console.log(collectJobItem);
+    //   collectJobArr.push(collectJobItem);
+    // });
+    // console.log(collectJobArr);
+    // ctx.body = {
+    //   code: 200,
+    //   msg: '获取所有收藏的职位成功',
+    //   data: data,
+    // }
+  } catch (err) {
+    consolog('earnCollectJob========' + err);
+  }
+}
+
+/*f已发送简历*/
+async function sendCurriculumVitaeToRecruiter(ctx, body) {
+  try {
+    let data = ctx.request.body;
+    let {jobId} = data;
+    let user = await utils.getUser(ctx);
+    let jobHunterId = user._id;
+    console.log(jobHunterId);
+    
+    /*presentJobHunterAndRecruiter是唯一的一个*/
+    let presentJobHunterAndRecruiter = await model.communicationDetail.find({
+      jobId,
+      jobHunterId
+    });
+    if (presentJobHunterAndRecruiter.length === 0) {
+      console.log(1234);
+      model.communicationDetail.create({
+        jobId,
+        jobHunterId,
+        isSendCurriculumVitaeToEmail: 1,
+      });
+    } else {
+      console.log(5678);
+      presentJobHunterAndRecruiter[0].isSendCurriculumVitaeToEmail = 1;
+      await presentJobHunterAndRecruiter[0].save();
+    }
+    ctx.body = {
+      code: 200,
+      msg: '发送请求成功'
+    }
+    
+    
+  } catch (err) {
+    console.log('sendCurriculumVitaeToRecruiter===========' + err);
+  }
+}
+
+
+/*获取求职者所发送的简历记录*/
+async function earnJobHunterCommunicateData(ctx, body) {
+  try {
+    let data = ctx.request.body;
+    let user = await utils.getUser(ctx);
+    let allCommunicateData = await model.communicationDetail.find({
+      jobHunterId: user._id
+    });
+    let hadCurriculumVitaeData = [], interviewData = [], hasCurriculumVitaeData = [];
+    /*求职者发送的简历记录*/
+    hadCurriculumVitaeData = allCommunicateData.filter((item, index) => {
+      if (item.isSendCurriculumVitaeToEmail) {
+        return item;
+      }
+    });
+    /*招聘者发送的面试邀请*/
+    interviewData = allCommunicateData.filter((item, index) => {
+      if (item.isSendInterview) {
+        return item;
+      }
+    });
+    /*招聘者所发出的发送简历邀请*/
+    hasCurriculumVitaeData = allCommunicateData.filter((item, index) => {
+      if (!item.isSendCurriculumVitaeToEmail) {
+        return item;
+      }
+    });
+    
+    ctx.body = {
+      code: 200,
+      msg: '发送成功',
+      data: {
+        allCommunicateData,
+        hadCurriculumVitaeData,
+        interviewData,
+        hasCurriculumVitaeData
+      }
+      
+    }
+  } catch (err) {
+    console.log('earnCurriculumVitaeCommunicateData===========' + err);
+  }
+}
+
+async function hasCurriculumVitaeData(ctx, body) {
+  try {
+    let data = ctx.request.body;
+    console.log(data);
+    let {allCommunicateData} = data;
+    let user = await utils.getUser(ctx);
+    let detailCompanyData = [];
+    ctx.body = await new Promise((resolve, reject) => {
+      allCommunicateData.forEach(async (item, index) => {
+        console.log(item.recruiterId);
+        let singleRecruiter = await model.user.findOne({
+          _id: item.recruiterId
+        });
+        let company = await model.company.findOne({
+          companyCode: singleRecruiter.companyCode
+        });
+        detailCompanyData.push(company);
+        
+        if (index === allCommunicateData.length - 1) {
+          resolve({
+            code: 200,
+            msg: '获取成功',
+            data: detailCompanyData,
+          })
+        }
+      })
+    })
+  } catch (err) {
+    console.log('hadCurriculumVitaeData===========' + err);
+  }
+}
+
+async function earnInterviewData(ctx, body) {
+  try {
+    let data = ctx.request.body;
+    console.log(data);
+    let {allInerviewData} = data;
+    let detailInterviewData = [];
+    ctx.body = await new Promise((resolve, reject) => {
+      allInerviewData.forEach(async (item, index) => {
+        console.log(item);
+        let singleRecruiter = await model.user.findOne({
+          _id: item.recruiterId
+        });
+        let company = await model.company.findOne({
+          companyCode: singleRecruiter.companyCode
+        });
+        let obj = {};
+        obj.company = company;
+        obj.interviewDetail = item.interviewDetail;
+        // // company.interviewDetail = 'ddddddddddddddddd';
+        console.log('dddddddddd');
+        console.log(obj);
+        //
+        detailInterviewData.push(obj);
+        
+        
+        if (index === allInerviewData.length - 1) {
+          console.log('aaaaaaaaaaaa');
+          console.log(detailInterviewData);
+          resolve({
+            code: 200,
+            msg: '获取成功',
+            data: detailInterviewData,
+          })
+        }
+      })
+    })
+    
+  } catch (err) {
+    console.log('earnInterviewData=============' + err);
+  }
+}
+
+async function earnHadCurriculumVitaeData(ctx, body) {
+  try {
+    let data = ctx.request.body;
+    console.log(data);
+    let {hadCurriculumVitaeData} = data;
+    let user = await utils.getUser(ctx);
+    let detailJobData = [];
+    ctx.body = await new Promise((resolve, reject) => {
+      hadCurriculumVitaeData.forEach(async (item, index) => {
+        console.log(item);
+        let singleJobHunter = await model.jobType.findOne({
+          _id: item.jobId
+        });
+        detailJobData.push(singleJobHunter);
+        
+        if (index === hadCurriculumVitaeData.length - 1) {
+          resolve({
+            code: 200,
+            msg: '获取成功',
+            data: detailJobData,
+          })
+        }
+      })
+    })
+  } catch (err) {
+    console.log('earnHadCurriculumVitaeData============' + err);
+  }
+}
+
+
+async function searchJoborCompany(ctx, body) {
+  try {
+    let data = ctx.request.body;
+    console.log(data);
+    let {value, type} = data;
+    if (type === 'job') {
+      
+      let expectJobLabel = value;
+      
+      let user = await utils.getUser(ctx);
+      let {expectCity} = user;
+      if (user) {
+        console.log(expectJobLabel);
+        let allRecommendJob;
+        allRecommendJob = await model.jobType.find({
+          isDelete: 0,
+          jobLabel: expectJobLabel,
+          chooseCity: expectCity,
+          
+        });
+        console.log(allRecommendJob.length);
+        
+        ctx.body = {
+          code: 200,
+          msg: '推荐成功',
+          data: allRecommendJob
+        }
+      }
+    } else if (type === 'company') {
+      console.log('aaaaaaa');
+      let companyData = await model.company.find({
+        companyName: value
+      });
+      ctx.body = {
+        code: 200,
+        msg: '推荐成功',
+        data: companyData
+      }
+    } else {
+      ctx.body = {
+        code: 401,
+        msg: '请重新登录'
+      }
+    }
+  } catch (err) {
+    console.log('searchJoborCompany============' + err);
+  }
+}
+
+
 module.exports = {
   earnRecommendJob,
   earnJobDetail,
@@ -371,5 +700,13 @@ module.exports = {
   earnAllAttentionCompany,
   deleteSingleWorkExpericence,
   earnJobHunterCurriculumviate,
-  updateJobWantedIntention
+  updateJobWantedIntention,
+  collectJob,
+  earnCollectJob,
+  sendCurriculumVitaeToRecruiter,
+  earnJobHunterCommunicateData,
+  hasCurriculumVitaeData,
+  earnInterviewData,
+  earnHadCurriculumVitaeData,
+  searchJoborCompany,
 };

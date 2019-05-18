@@ -50,6 +50,16 @@ router.post('/jobhunter/earnAllAttentionCompany', doController.jobHunter.earnAll
 router.post('/jobhunter/earnJobHunterCurriculumviate', doController.jobHunter.earnJobHunterCurriculumviate);
 router.post('/jobhunter/deleteSingleWorkExpericence', doController.jobHunter.deleteSingleWorkExpericence);
 router.post('/jobhunter/updateJobWantedIntention', doController.jobHunter.updateJobWantedIntention);
+router.post('/jobhunter/collectJob', doController.jobHunter.collectJob);
+router.post('/jobhunter/earnCollectJob', doController.jobHunter.earnCollectJob);
+router.post('/jobhunter/sendCurriculumVitaeToRecruiter', doController.jobHunter.sendCurriculumVitaeToRecruiter)
+router.post('/jobhunter/earnJobHunterCommunicateData', doController.jobHunter.earnJobHunterCommunicateData)
+router.post('/jobhunter/hasCurriculumVitaeData', doController.jobHunter.hasCurriculumVitaeData)
+router.post('/jobhunter/earnInterviewData', doController.jobHunter.earnInterviewData)
+router.post('/jobhunter/earnHadCurriculumVitaeData', doController.jobHunter.earnHadCurriculumVitaeData)
+router.post('/jobhunter/searchJoborCompany', doController.jobHunter.searchJoborCompany)
+
+
 
 
 
@@ -77,6 +87,27 @@ router.post('/recruiter/allCompanyInfo', doController.recruiter.allCompanyInfo)
 router.post('/recruiter/saveCompanyDetailInfo', doController.recruiter.saveCompanyDetailInfo)
 
 router.post('/recruiter/saveCompanyImage', doController.recruiter.saveCompanyImage)
+router.post('/recruiter/sendCurriculumVitaeToEmail', doController.recruiter.sendCurriculumVitaeToEmail)
+router.post('/recruiter/sendInterviewDetail', doController.recruiter.sendInterviewDetail)
+router.post('/recruiter/earnCommunicateData', doController.recruiter.earnCommunicateData)
+router.post('/recruiter/earnDetailCommunicateData', doController.recruiter.earnDetailCommunicateData)
+router.post('/recruiter/earnInterviewData', doController.recruiter.earnInterviewData)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

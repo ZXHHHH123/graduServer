@@ -6,5 +6,6 @@ module.exports = {
     offLineMsg: require('./offLineMsgModel'),//信息失败存储表
   company: require('./companyModel'), //公司内容存储表
   jobType: require('./jobTypeModel'), //公司内容存储表
-  city: require('./cityModel') //公司内容存储表
+  city: require('./cityModel'), //公司内容存储表
+  communicationDetail: require('./communicationDetailModel')
 };
