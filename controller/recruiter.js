@@ -40,7 +40,7 @@ async function recruitjob(ctx, next) {
       let company = await model.company.findOne({companyCode});
       //公司是肯定存在的，因为在注册的时候就创建了对应的公司
       if (!!company) {
-        let {companyCode, companyName, isBelisted, companyAddress, companyLogo, companyPeopleNum, companyIndustry} = company;
+        let {companyCode, companyName, isBelisted, companyAddress, companyLogo, companyPeopleNum, companyIndustry, companyEmail} = company;
         //数据库存在当前companyId的公司，所以不用新建公司item；
         console.log('存在公司');
         let job = await model.jobType.create({
@@ -54,6 +54,7 @@ async function recruitjob(ctx, next) {
           floorMoney,
           chooseCity,
           chooseCityValue,
+          companyEmail,
           publisher: user.nickName,
           publisherPlace: user.place,
           publisherId: user._id,
@@ -81,6 +82,7 @@ async function recruitjob(ctx, next) {
               jobLabel,
               upMoney,
               floorMoney,
+              companyEmail,
               publisher,
               publisherImg,
               publisherPlace,
@@ -771,16 +773,22 @@ async function sendCurriculumVitaeToEmail(ctx, body) {
     console.log(data);
     let {jobHunterId} = data;
     let user = await utils.getUser(ctx);
+    console.log(user);
     let recruiterId = user._id;
+    let companyCode = user.companyCode;
+    console.log(companyCode);
     /*presentJobHunterAndRecruiter是唯一的一个*/
     let presentJobHunterAndRecruiter = await model.communicationDetail.find({
       jobHunterId,
-      recruiterId
+      companyCode,
     });
+    console.log(99999);
+    console.log(presentJobHunterAndRecruiter);
     if (presentJobHunterAndRecruiter.length === 0) {
       model.communicationDetail.create({
         jobHunterId,
         recruiterId,
+        companyCode,
         curriculumVitaeToEmail: 1,
       });
     } else {
@@ -803,15 +811,19 @@ async function sendInterviewDetail(ctx, body) {
     let {jobHunterId, interviewAddress, interviewTime, wxCode, remarks} = data;
     let user = await utils.getUser(ctx);
     let recruiterId = user._id;
+    let companyCode = user.companyCode;
+    console.log(99999999);
     /*presentJobHunterAndRecruiter是唯一的一个*/
     let presentJobHunterAndRecruiter = await model.communicationDetail.find({
       jobHunterId,
+      companyCode,
       recruiterId
     });
     if (presentJobHunterAndRecruiter.length === 0) {
       model.communicationDetail.create({
         jobHunterId,
         recruiterId,
+        companyCode,
         isSendInterview: 1,
         interviewDetail: {
           interviewAddress,

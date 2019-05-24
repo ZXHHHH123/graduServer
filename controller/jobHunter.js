@@ -194,8 +194,9 @@ async function earnRecommendCompany(ctx, body) {
           if ((jobPeopleNumFloor >= (companyPeopleNumFloor - 20)) && (jobPeopleNumFloor <= (companyPeopleNumFloor + 20 )) || (jobPeopleNumUp >= (companyPeopleNumUp - 20 ) && jobPeopleNumUp <= (companyPeopleNumUp + 20 ))) {
             return item
           }
+        }else{
+          return item
         }
-        return item
       });
       
       
@@ -464,6 +465,7 @@ async function sendCurriculumVitaeToRecruiter(ctx, body) {
     let data = ctx.request.body;
     let {jobId} = data;
     let companyItem = await model.jobType.findOne({_id: jobId});
+    console.log(companyItem);
     let user = await utils.getUser(ctx);
     let jobHunterId = user._id;
     console.log(jobHunterId);
@@ -702,6 +704,7 @@ async function saveComplainDetailInfo(ctx, body) {
     let {complainAccount, jobId} = data;
     console.log(complainAccount);
     let user = await utils.getUser(ctx);
+    let presentJob = await model.jobType.findOne({_id: jobId});
     let presentComplainJob = await model.complain.findOne({
       userId: user._id,
       jobId: jobId
@@ -716,8 +719,8 @@ async function saveComplainDetailInfo(ctx, body) {
         userId: user._id,
         nickName: user.nickName,
         image: user.image,
-        companyName: user.unit,
-        companyCode: user.companyCode,
+        companyName: presentJob.companyName,
+        companyCode: presentJob.companyCode,
         jobId,
         complainAccount
       })

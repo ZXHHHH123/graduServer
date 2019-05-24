@@ -28,7 +28,7 @@ router.post('/user/submitBossInfImg', doController.user.submitBossInfImg);
 router.post('/user/submitBossInfoBasic', doController.user.submitBossInfoBasic);
 router.post('/user/submitTitImg', doController.user.submitTitImg);
 router.post('/user/submitUserBasicInfo', doController.user.submitUserBasicInfo);
-
+router.post('/user/changeJobHunter', doController.user.changeJobHunter);
 
 
 

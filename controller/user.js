@@ -693,6 +693,26 @@ async function submitUserBasicInfo(ctx, body) {
   }
 }
 
+async function changeJobHunter(ctx, body) {
+  try {
+    let user = await utils.getUser(ctx);
+    let data = ctx.request.body;
+    let {isChangeBoss} = data;
+    if(isChangeBoss) {
+      user.isCompany = 1;
+    }else {
+      user.isCompany = 0;
+    }
+    await user.save();
+    ctx.body = {
+      code: 200,
+      msg: '转换身份成功'
+    }
+  }catch (err) {
+    console.log('changeJobHunter==========' + err);
+  }
+}
+
 function upToQiniu(filePath, key) {
   const accessKey = qiniuConf.accessKey // 你的七牛的accessKey
   const secretKey = qiniuConf.secretKey // 你的七牛的secretKey
@@ -741,5 +761,6 @@ module.exports = {
   submitBossInfImg,
   submitBossInfoBasic,
   submitTitImg,
-  submitUserBasicInfo
+  submitUserBasicInfo,
+changeJobHunter
 };

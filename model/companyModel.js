@@ -47,6 +47,7 @@ let mongoose = require('../config/util/db'),
         experienceRequire: {type: String, default: ''},
         studyRequire: {type: String, default: ''},
         chooseCity: {type: String, default: 0},
+        companyEmail: {type: String, default: ''},
       }],
   
       companyLogo: {type: String, default: ''},

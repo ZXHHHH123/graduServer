@@ -9,6 +9,7 @@ let mongoose = require('../config/util/db'),
       jobValue: {type: String, default: ''},
   
       userEmail: {type: String, default: ''},
+      companyEmail: {type: String, default: ''},
       
       jobAccount: {type: String, default: ''},
       jobAddress: {type: String, default: ''},
