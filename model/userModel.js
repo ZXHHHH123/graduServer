@@ -41,6 +41,7 @@ let mongoose = require('../config/util/db'),
       job: {type: String, default: ''},             //具体职业
       isWorking: {type: Number, default: 0},     //0代表未就业，1代表已就业
       collectJobArr: [],                           //用户收藏的公司岗位
+      collectJobHunterArr: [], //用户收藏的牛人
       
       
       /*公司信息*/
@@ -52,6 +53,9 @@ let mongoose = require('../config/util/db'),
       creditReverseSide: {type: 'String', default: ''},
       userCreditCode: {type: 'String', default: ''},
       wxCode: {type: 'String', default: ''},
+      
+      
+      isAdmin: {type: Number, default: 0},
     }, {versionKey: false, usePushEach: true});
 
 let model = mongoose.model('user', schema);

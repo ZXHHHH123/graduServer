@@ -7,5 +7,7 @@ module.exports = {
   company: require('./companyModel'), //公司内容存储表
   jobType: require('./jobTypeModel'), //公司内容存储表
   city: require('./cityModel'), //公司内容存储表
-  communicationDetail: require('./communicationDetailModel')
+  communicationDetail: require('./communicationDetailModel'),
+  examine: require('./examineModel'),
+  complain: require('./complainModel'),
 };

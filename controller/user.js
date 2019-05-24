@@ -269,10 +269,10 @@ async function login(ctx, next) {
 };
 
 /*
-* 修改账号手机号码
-* */
+ * 修改账号手机号码
+ * */
 async function updatePhone(ctx, next) {
-  try{
+  try {
     let body = ctx.request.body;
     let nowTime = +new Date();
     let {phone, smsCode} = body;
@@ -280,14 +280,14 @@ async function updatePhone(ctx, next) {
     //找到手机号码所对应的验证码
     let SMSCode = await model.SMS.findOne({phone: phone});
     console.log('register --222' + JSON.stringify(SMSCode));
-    if(!!SMSCode) {
+    if (!!SMSCode) {
       if (SMSCode.codeStatus === 0 && smsCode === SMSCode.verifyCode) {
         if ((nowTime - SMSCode.createTime) > smsConfig.dbloseEfficacy) {
           ctx.body = {
             code: 302,
             msg: 'SMSCode is old'
           }
-        }else {
+        } else {
           SMSCode.codeStatus = 1;
           await SMSCode.save();
           user.phone = phone;
@@ -298,13 +298,13 @@ async function updatePhone(ctx, next) {
           }
         }
       }
-    }else {
+    } else {
       ctx.body = {
         code: 303,
         msg: 'this phone SMSCode is no'
       }
     }
-  }catch (e){
+  } catch (e) {
     console.log('updatePhone----------err' + e)
   }
 }
@@ -363,8 +363,8 @@ async function updatePwd(ctx, next) {
   }
 }
 
-async  function personSettingFixPhone(ctx, next) {
-  try{
+async function personSettingFixPhone(ctx, next) {
+  try {
     let body = ctx.request.body;
     console.log(body);
     let {pwd} = body;
@@ -375,26 +375,26 @@ async  function personSettingFixPhone(ctx, next) {
       code: 200,
       msg: '更改密码成功'
     }
-  }catch (err) {
-    console.log('personSettingFixPhone----------报错'+ err)
+  } catch (err) {
+    console.log('personSettingFixPhone----------报错' + err)
   }
 }
 
 /*用户基本信息*/
 async function userInfo(ctx, next) {
-  try{
+  try {
     let user = await utils.getUser(ctx);
     let allPublishJobType = {}; //招聘者所发布的职位中所有的职位类型
-    if(user.isCompany == 1) {
+    if (user.isCompany == 1) {
       let companyCode = user.companyCode;
-  
-  
+      
+      
       let companyPublishJob = (await model.company.findOne({companyCode})).publishJobIdArray;
       console.log(user._id);
       let presentHrPublishJob = companyPublishJob.filter((item, index) => {
-        return item.publisherId == user._id && item.isDelete!==1;
+        return item.publisherId == user._id && item.isDelete !== 1;
       });
-      if(presentHrPublishJob.length === 0) {
+      if (presentHrPublishJob.length === 0) {
         ctx.body = {
           code: 200,
           msg: '成功获得用户信息',
@@ -403,18 +403,20 @@ async function userInfo(ctx, next) {
             allPublishJobType
           }
         }
-      }else {
-        ctx.body = await new Promise((resolve, reject) =>{
-    
+      } else {
+        ctx.body = await new Promise((resolve, reject) => {
+          
           let typeNum = 0;
           presentHrPublishJob.forEach(async (item, index, presentHrPublishJob) => {
             let jobDetail = await model.jobType.findOne({_id: item.jobId});
-            if(!allPublishJobType[jobDetail.jobLabel]) {
-              allPublishJobType[jobDetail.jobLabel] = {key: jobDetail.jobValue, label: jobDetail.jobLabel, value: typeNum};
+            if (!allPublishJobType[jobDetail.jobLabel]) {
+              allPublishJobType[jobDetail.jobLabel] = {
+                key: jobDetail.jobValue, label: jobDetail.jobLabel, value: typeNum
+              };
               typeNum++;
             }
-      
-            if(index === presentHrPublishJob.length - 1){
+            
+            if (index === presentHrPublishJob.length - 1) {
               let data = {
                 user,
                 allPublishJobType
@@ -426,9 +428,9 @@ async function userInfo(ctx, next) {
               })
             }
           })
-        }) ;
+        });
       }
-    }else {
+    } else {
       let data = {
         user,
         allPublishJobType
@@ -439,8 +441,8 @@ async function userInfo(ctx, next) {
         data
       }
     }
-
-  }catch (e){
+    
+  } catch (e) {
     console.log('userInfo--------err' + e);
   }
   
@@ -457,7 +459,7 @@ async function submitBossInfImg(ctx, next) {
     let user = await model.user.findOne({_id: userId});
     let {imageFile, creditFrontSideFile, creditReverseSideFile, nickName, place, userEmail, userCreditCode} = ctx.request.files;
     console.log('imageFile==========');
-
+    
     let imgPath = imageFile.path;
     let qiniu = await upToQiniu(imgPath);
     let imageUrl = qiniuConf.qiniuApi + qiniu.key;
@@ -471,7 +473,27 @@ async function submitBossInfImg(ctx, next) {
     qiniu = await upToQiniu(creditReverseSideFilePath);
     let creditReverseSideFileUrl = qiniuConf.qiniuApi + qiniu.key;
     // console.log('creditReverseSideFileUrl======' + creditReverseSideFileUrl);
-    
+    let examineItem = await model.examine.findOne({userId: user._id});
+    if (examineItem) {
+      examineItem.image = imageUrl;
+      examineItem.creditFrontSide = creditFrontSideFileUrl;
+      examineItem.creditReverseSide = creditReverseSideFileUrl;
+      await examineItem.save();
+      ctx.body = {
+        code: 200,
+        msg: '保存成功'
+      }
+    } else {
+      await model.examine.create({
+        image: imageUrl,
+        creditFrontSide,
+        creditReverseSide,
+      });
+      ctx.body = {
+        code: 200,
+        msg: '保存成功'
+      }
+    }
     
     user.image = imageUrl;
     user.creditFrontSide = creditFrontSideFileUrl;
@@ -487,49 +509,138 @@ async function submitBossInfImg(ctx, next) {
     console.log('submitBossInfo--------err' + e);
   }
 }
+
+
+// async function submitBossInfImg(ctx, next) {
+//   try {
+//     let sign = ctx.request.header.authorization;
+//     sign = sign.substring(7);
+//     let userId = await redisUtil.AsyncGet(sign);
+//     let user = await model.user.findOne({_id: userId});
+//     let {imageFile, creditFrontSideFile, creditReverseSideFile, nickName, place, userEmail, userCreditCode} = ctx.request.files;
+//     console.log('imageFile==========');
+//
+//     let imgPath = imageFile.path;
+//     let qiniu = await upToQiniu(imgPath);
+//     let imageUrl = qiniuConf.qiniuApi + qiniu.key;
+//     // console.log('imageUrl =====' + imageUrl);
+//     let creditFrontSideFilePath = creditFrontSideFile.path;
+//     qiniu = await upToQiniu(creditFrontSideFilePath);
+//     let creditFrontSideFileUrl = qiniuConf.qiniuApi + qiniu.key;
+//     // console.log('creditFrontSideFileUrl========' + creditFrontSideFileUrl);
+//
+//     let creditReverseSideFilePath = creditReverseSideFile.path;
+//     qiniu = await upToQiniu(creditReverseSideFilePath);
+//     let creditReverseSideFileUrl = qiniuConf.qiniuApi + qiniu.key;
+//     // console.log('creditReverseSideFileUrl======' + creditReverseSideFileUrl);
+//
+//
+//     user.image = imageUrl;
+//     user.creditFrontSide = creditFrontSideFileUrl;
+//     user.creditReverseSide = creditReverseSideFileUrl;
+//     await user.save();
+//     ctx.body = {
+//       code: 200,
+//       msg: '上传成功',
+//       imageUrl,
+//     };
+//
+//   } catch (e) {
+//     console.log('submitBossInfo--------err' + e);
+//   }
+// }
+
 async function submitBossInfoBasic(ctx, next) {
-  try{
+  try {
     let data = ctx.request.body;
     console.log('submitBossInfBasic---------------');
     let user = await utils.getUser(ctx);
-    user.unit = data.unit;
-    user.nickName = data.nickName;
-    user.place = data.place;
-    user.userCreditCode = data.userCreditCode;
-    user.userEmail = data.userEmail;
-    user.companyCode = data.companyCode;
-    let companyCode = data.companyCode;
-    /*判断该公司是否已经创建过，如果没有则添加该公司*/
-    let company = await model.company.findOne({companyCode});
-    if(!company) {
-      console.log('不存在公司');
-      let new_company = await model.company.create({
-        companyName: data.unit,
+    console.log(user._id);
+    
+    console.log(data);
+    let examineItem = await model.examine.findOne({userId: user._id});
+    if (examineItem) {
+      examineItem.unit = data.unit;
+      examineItem.nickName = data.nickName;
+      examineItem.place = data.place;
+      examineItem.userCreditCode = data.userCreditCode;
+      examineItem.userEmail = data.userEmail;
+      examineItem.companyCode = data.companyCode;
+      await examineItem.save();
+      ctx.body = {
+        code: 200,
+        msg: '保存成功'
+      }
+    } else {
+      await model.examine.create({
+        userId: user._id,
+        unit: data.unit,
+        nickName: data.nickName,
+        place: data.place,
+        userCreditCode: data.userCreditCode,
+        userEmail: data.userEmail,
         companyCode: data.companyCode,
-        hrArray: [{
-          hrId: user._id,
-          name: user.nickName,
-          gender: user.gender,
-        }]
       });
+      ctx.body = {
+        code: 200,
+        msg: '保存成功'
+      }
     }
+    
     
     await user.save();
     ctx.body = {
       code: 200,
       msg: 'basic info ok',
     }
-  }catch(e){
+  } catch (e) {
     console.log('submitBossInfBasic--------err' + e);
   }
 }
 
+// async function submitBossInfoBasic(ctx, next) {
+//   try{
+//     let data = ctx.request.body;
+//     console.log('submitBossInfBasic---------------');
+//     let user = await utils.getUser(ctx);
+//     user.unit = data.unit;
+//     user.nickName = data.nickName;
+//     user.place = data.place;
+//     user.userCreditCode = data.userCreditCode;
+//     user.userEmail = data.userEmail;
+//     user.companyCode = data.companyCode;
+//     let companyCode = data.companyCode;
+//     /*判断该公司是否已经创建过，如果没有则添加该公司*/
+//     let company = await model.company.findOne({companyCode});
+//     if(!company) {
+//       console.log('不存在公司');
+//       let new_company = await model.company.create({
+//         companyName: data.unit,
+//         companyCode: data.companyCode,
+//         hrArray: [{
+//           hrId: user._id,
+//           name: user.nickName,
+//           gender: user.gender,
+//         }]
+//       });
+//     }
+//
+//     await user.save();
+//     ctx.body = {
+//       code: 200,
+//       msg: 'basic info ok',
+//     }
+//   }catch(e){
+//     console.log('submitBossInfBasic--------err' + e);
+//   }
+// }
+
 /*更新头像*/
 async function submitTitImg(ctx, next) {
-  try{
+  try {
     console.log('submittitimg');
-   console.log(ctx.request.files);
-   let {titImgFile} = ctx.request.files;
+    console.log(ctx.request.files);
+    let {titImgFile} = ctx.request.files;
     let user = await utils.getUser(ctx);
     let imgPath = titImgFile.path;
     let qiniu = await upToQiniu(imgPath);
@@ -538,37 +649,38 @@ async function submitTitImg(ctx, next) {
     await user.save();
     ctx.body = {
       code: 200,
-      msg: '更新头像成功'
+      msg: '更新头像成功',
+      data: imageUrl
     }
-  
-  
-  }catch (err) {
+    
+    
+  } catch (err) {
     console.log('submitTitImg==============' + err)
   }
 };
 
 async function submitUserBasicInfo(ctx, body) {
-  try{
+  try {
     let data = ctx.request.body;
     let user = await utils.getUser(ctx);
-    let { nickName, gender, studyBackground, joinWorkTime, birthTime,personAccount} = data;
-    console.log(nickName, gender, joinWorkTime, birthTime,personAccount);
-    if(nickName) {
+    let {nickName, gender, studyBackground, joinWorkTime, birthTime, personAccount} = data;
+    console.log(nickName, gender, joinWorkTime, birthTime, personAccount);
+    if (nickName) {
       user.nickName = nickName;
     }
-    if(gender) {
+    if (gender) {
       user.gender = gender;
     }
-    if(studyBackground) {
+    if (studyBackground) {
       user.studyBackground = studyBackground;
     }
-    if(joinWorkTime) {
+    if (joinWorkTime) {
       user.joinWorkTime = joinWorkTime;
     }
-    if(birthTime) {
+    if (birthTime) {
       user.birthday = birthTime;
     }
-    if(personAccount) {
+    if (personAccount) {
       user.personAccount = personAccount;
     }
     await user.save();
@@ -576,7 +688,7 @@ async function submitUserBasicInfo(ctx, body) {
       code: 200,
       msg: '更新基本信息成功'
     }
-  }catch (err) {
+  } catch (err) {
     console.log('submitUserBasicInfo============' + err);
   }
 }

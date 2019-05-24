@@ -210,17 +210,9 @@ async function deleteRecruitjob(ctx, body) {
     let companyCode = user.companyCode;
     let company = await model.company.findOne({companyCode});
     let companyPublishJobIdArray = company.publishJobIdArray;
-    console.log(444444444);
-    console.log(companyPublishJobIdArray);
     companyPublishJobIdArray.forEach((item, index) => {
-      console.log(5555555);
-      console.log(item);
-      console.log(item.jobId);
       if (item.jobId == deleteJobId) {
-        console.log(3333);
         item.isDelete = 1;
-        console.log(9999999999);
-        console.log(companyPublishJobIdArray);
         company.publishJobIdArray = companyPublishJobIdArray;
         company.save();
         //  model.company.findOneAndUpdate({companyCode}, {
@@ -938,6 +930,50 @@ async function earnInterviewData(ctx, body) {
 
 
 
+async function collectJobHunter(ctx, body) {
+  try {
+    let data = ctx.request.body;
+    let {jobHunterId} = data;
+    let user = await utils.getUser(ctx);
+    let collectJobHunterArr = Array.from(user.collectJobHunterArr);
+    if (collectJobHunterArr.indexOf(jobHunterId) < 0) {
+      collectJobHunterArr.push(jobHunterId);
+    }
+    user.collectJobHunterArr = collectJobHunterArr;
+    await user.save();
+    ctx.body = {
+      code: 200,
+      msg: '收藏成功',
+    }
+  }catch (err) {
+    console.log('collectJobHunter============' + err);
+  }
+}
+
+
+async function earnCollectJobHunter(ctx, body) {
+  try {
+    let user = await utils.getUser(ctx);
+    let collectJobHunterIdArr = user.collectJobHunterArr;
+    let collectJobHunterArr = [];
+    ctx.body = await new Promise((resolve, reject) => {
+      collectJobHunterIdArr.forEach(async (item, index) => {
+        let collectJobItem = await model.user.findOne({_id: item});
+        collectJobHunterArr.push(collectJobItem);
+        if (index === collectJobHunterIdArr.length - 1) {
+          resolve({
+            code: 200,
+            msg: '获取所有收藏的职位成功',
+            data: collectJobHunterArr,
+          })
+        }
+      });
+    });
+  }catch (err) {
+    console.log('earnCollectJobHunter========' + err);
+  }
+}
+
 function upToQiniu(filePath, key) {
   const accessKey = qiniuConf.accessKey // 你的七牛的accessKey
   const secretKey = qiniuConf.secretKey // 你的七牛的secretKey
@@ -998,4 +1034,7 @@ module.exports = {
   earnCommunicateData,
   earnDetailCommunicateData,
   earnInterviewData,
+  
+  collectJobHunter,
+  earnCollectJobHunter
 }

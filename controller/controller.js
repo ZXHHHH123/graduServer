@@ -4,4 +4,8 @@ module.exports = {
   recruiter: require('./recruiter'),
   jobHunter: require('./jobHunter'),
   
+  admin: require('./admin'),
+  
+  
+  
 };

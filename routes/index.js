@@ -58,6 +58,8 @@ router.post('/jobhunter/hasCurriculumVitaeData', doController.jobHunter.hasCurri
 router.post('/jobhunter/earnInterviewData', doController.jobHunter.earnInterviewData)
 router.post('/jobhunter/earnHadCurriculumVitaeData', doController.jobHunter.earnHadCurriculumVitaeData)
 router.post('/jobhunter/searchJoborCompany', doController.jobHunter.searchJoborCompany)
+router.post('/jobhunter/saveComplainDetailInfo', doController.jobHunter.saveComplainDetailInfo)
+router.post('/jobhunter/saveComplainImage', doController.jobHunter.saveComplainImage)
 
 
 
@@ -92,6 +94,26 @@ router.post('/recruiter/sendInterviewDetail', doController.recruiter.sendIntervi
 router.post('/recruiter/earnCommunicateData', doController.recruiter.earnCommunicateData)
 router.post('/recruiter/earnDetailCommunicateData', doController.recruiter.earnDetailCommunicateData)
 router.post('/recruiter/earnInterviewData', doController.recruiter.earnInterviewData)
+router.post('/recruiter/collectJobHunter', doController.recruiter.collectJobHunter)
+router.post('/recruiter/earnCollectJobHunter', doController.recruiter.earnCollectJobHunter)
+
+
+
+
+
+
+
+router.post('/admin/login', doController.admin.login)
+router.post('/admin/earnWillExamine', doController.admin.earnWillExamine)
+router.post('/admin/earnHadExamine', doController.admin.earnHadExamine)
+router.post('/admin/examineItem', doController.admin.examineItem)
+
+
+router.post('/admin/earnWillComplain', doController.admin.earnWillComplain)
+router.post('/admin/earnHadComplain', doController.admin.earnHadComplain)
+router.post('/admin/examineComplain', doController.admin.examineComplain)
+
+
 
 
 

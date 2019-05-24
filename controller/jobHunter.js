@@ -6,6 +6,8 @@
 let model = require('../model/model');
 let utils = require('../config/util/utils');
 let redisUtil = require('../config/util/redisUtil');
+let qiniuConf = require('./../config/qiniuConfig.json');
+const qiniu = require('qiniu')
 
 /*
  * 求职者获取系统推荐的工作接口
@@ -163,7 +165,9 @@ async function earnRecommendCompany(ctx, body) {
       /*tudo 如果没有筛选值，就将所有符合求职者的‘期望工作类型的值’的公司传递过去*/
       let {expectIndustry} = user;
       let recommendCompany;
-      let company = await model.company.find();
+      let company = await model.company.find({
+        publishJobIdArray: {$ne : []}
+      });
       console.log(company);
       if (industryValue === '全部') {
         recommendCompany = company;
@@ -459,6 +463,7 @@ async function sendCurriculumVitaeToRecruiter(ctx, body) {
   try {
     let data = ctx.request.body;
     let {jobId} = data;
+    let companyItem = await model.jobType.findOne({_id: jobId});
     let user = await utils.getUser(ctx);
     let jobHunterId = user._id;
     console.log(jobHunterId);
@@ -473,6 +478,7 @@ async function sendCurriculumVitaeToRecruiter(ctx, body) {
       model.communicationDetail.create({
         jobId,
         jobHunterId,
+        companyCode: companyItem.companyCode,
         isSendCurriculumVitaeToEmail: 1,
       });
     } else {
@@ -690,6 +696,192 @@ async function searchJoborCompany(ctx, body) {
 }
 
 
+async function saveComplainDetailInfo(ctx, body) {
+  try {
+    let data = ctx.request.body;
+    let {complainAccount, jobId} = data;
+    console.log(complainAccount);
+    let user = await utils.getUser(ctx);
+    let presentComplainJob = await model.complain.findOne({
+      userId: user._id,
+      jobId: jobId
+    });
+    if (presentComplainJob) {
+      console.log(111);
+      presentComplainJob.complainAccount = complainAccount;
+      await presentComplainJob.save();
+    } else {
+      console.log(222);
+      await model.complain.create({
+        userId: user._id,
+        nickName: user.nickName,
+        image: user.image,
+        companyName: user.unit,
+        companyCode: user.companyCode,
+        jobId,
+        complainAccount
+      })
+    }
+    
+    ctx.body = {
+      code: 200,
+      msg: '提交信息成功',
+    }
+  } catch (err) {
+    console.log('saveComplainDetailInfo=========' + err);
+  }
+}
+
+
+async function saveComplainImage(ctx, body) {
+  try {
+    let data = ctx.request.body;
+    let user = await utils.getUser(ctx);
+    
+    let jobId = ctx.request.body.jobId;
+    let {imageFile0, imageFile1, imageFile2, imageFile3, imageFile4, companyLogo} = ctx.request.files;
+    let imgPath0, imgPath1, imgPath2, imgPath3, imgPath4, companyLogoPath;
+    let presentComplainJob = await model.complain.findOne({
+      userId: user._id,
+      jobId: jobId
+    });
+    
+    
+    if(presentComplainJob){
+      let complainImage = Array.from(presentComplainJob.complainImage);
+      if (imageFile0) {
+        imgPath0 = imageFile0.path;
+        let qiniu = await upToQiniu(imgPath0);
+        let imageUrl = qiniuConf.qiniuApi + qiniu.key;
+        complainImage.push({uri: imageUrl})
+      }
+      if (imageFile1) {
+        imgPath1 = imageFile1.path;
+        let qiniu = await upToQiniu(imgPath1);
+        let imageUrl = qiniuConf.qiniuApi + qiniu.key;
+        complainImage.push({uri: imageUrl})
+      }
+      if (imageFile2) {
+        imgPath2 = imageFile2.path;
+        let qiniu = await upToQiniu(imgPath2);
+        let imageUrl = qiniuConf.qiniuApi + qiniu.key;
+        complainImage.push({uri: imageUrl})
+      }
+      if (imageFile3) {
+        imgPath3 = imageFile3.path;
+        let qiniu = await upToQiniu(imgPath3);
+        let imageUrl = qiniuConf.qiniuApi + qiniu.key;
+        complainImage.push({uri: imageUrl})
+      }
+      if (imageFile4) {
+        imgPath4 = imageFile4.path;
+        let qiniu = await upToQiniu(imgPath4);
+        let imageUrl = qiniuConf.qiniuApi + qiniu.key;
+        complainImage.push({uri: imageUrl})
+      }
+      let result = [];
+      let obj = {};
+      for (let i = 0; i < complainImage.length; i++) {
+        if (!obj[complainImage[i].uri]) {
+          result.push(complainImage[i]);
+          obj[complainImage[i].uri] = true;
+        }
+      }
+      presentComplainJob.complainImage = result;
+      await presentComplainJob.save();
+      ctx.body = {
+        code: 200,
+        msg: '图片上传成功'
+      }
+    }else {
+      let complainImage = [];
+      if (imageFile0) {
+        imgPath0 = imageFile0.path;
+        let qiniu = await upToQiniu(imgPath0);
+        let imageUrl = qiniuConf.qiniuApi + qiniu.key;
+        complainImage.push({uri: imageUrl})
+      }
+      if (imageFile1) {
+        imgPath1 = imageFile1.path;
+        let qiniu = await upToQiniu(imgPath1);
+        let imageUrl = qiniuConf.qiniuApi + qiniu.key;
+        complainImage.push({uri: imageUrl})
+      }
+      if (imageFile2) {
+        imgPath2 = imageFile2.path;
+        let qiniu = await upToQiniu(imgPath2);
+        let imageUrl = qiniuConf.qiniuApi + qiniu.key;
+        complainImage.push({uri: imageUrl})
+      }
+      if (imageFile3) {
+        imgPath3 = imageFile3.path;
+        let qiniu = await upToQiniu(imgPath3);
+        let imageUrl = qiniuConf.qiniuApi + qiniu.key;
+        complainImage.push({uri: imageUrl})
+      }
+      if (imageFile4) {
+        imgPath4 = imageFile4.path;
+        let qiniu = await upToQiniu(imgPath4);
+        let imageUrl = qiniuConf.qiniuApi + qiniu.key;
+        complainImage.push({uri: imageUrl})
+      }
+      await model.complain.create({
+        userId: user._id,
+        nickName: user.nickName,
+        image: user.image,
+        companyName: user.unit,
+        companyCode: user.companyCode,
+        jobId,
+        complainImage: complainImage
+      });
+      ctx.body = {
+        code: 200,
+        msg: '上传图片成功'
+      }
+    }
+    
+    // console.log(ctx.request.files);
+  } catch (err) {
+    console.log('saveComplainImage=========' + err);
+  }
+}
+
+
+function upToQiniu(filePath, key) {
+  const accessKey = qiniuConf.accessKey // 你的七牛的accessKey
+  const secretKey = qiniuConf.secretKey // 你的七牛的secretKey
+  const mac = new qiniu.auth.digest.Mac(accessKey, secretKey)
+  
+  // const options = {
+  //   scope: qiniuConf.scope // 你的七牛存储对象
+  // }
+  var options = {
+    scope: 'zchuhyy',
+  };
+  const putPolicy = new qiniu.rs.PutPolicy(options)
+  const uploadToken = putPolicy.uploadToken(mac)
+  
+  const config = new qiniu.conf.Config()
+  // 空间对应的机房
+  config.zone = qiniu.zone.Zone_z0
+  const localFile = filePath
+  const formUploader = new qiniu.form_up.FormUploader(config)
+  const putExtra = new qiniu.form_up.PutExtra()
+  // 文件上传
+  return new Promise((resolved, reject) => {
+    formUploader.putFile(uploadToken, key, localFile, putExtra, function (respErr, respBody, respInfo) {
+      if (respErr) {
+        reject(respErr)
+      }
+      if (respInfo.statusCode == 200) {
+        resolved(respBody)
+      } else {
+        resolved(respBody)
+      }
+    })
+  })
+  
+}
 module.exports = {
   earnRecommendJob,
   earnJobDetail,
@@ -709,4 +901,6 @@ module.exports = {
   earnInterviewData,
   earnHadCurriculumVitaeData,
   searchJoborCompany,
+  saveComplainDetailInfo,
+  saveComplainImage
 };
